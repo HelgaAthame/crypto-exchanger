@@ -1,0 +1,110 @@
+# RateBridge
+
+A portfolio demo project: a fiat/crypto exchange rate calculator with live rates
+and simulated exchange requests.
+
+> **Demo project — no real funds are transferred.** Rates are live (public APIs),
+> but there is no integration with real payment providers or crypto wallets.
+> Exchange requests are simulated for demonstration purposes only.
+
+## What this is
+
+RateBridge lets a user pick a currency to give and a currency to receive
+(fiat → crypto, crypto → fiat, or crypto → crypto), enter an amount, and see the
+live exchange rate together with the exchanger's fee and the resulting amount.
+The user can then create a demo exchange request, which is stored locally in the
+browser and automatically moves from "pending" to "completed" after a short delay
+to simulate a real exchange flow.
+
+**Problem:** rates are scattered across many sites/exchanges; there's no single
+convenient calculator with request history.
+
+**Solution:** one screen — pick currencies, see the live rate and resulting
+amount, create a request, track it.
+
+**My role:** solo — product, design, full stack.
+
+This is **not** a real, working crypto exchange business. It intentionally has no
+KYC/AML, no real payment integration, and no custody of funds — building that
+would require regulatory licensing in the real world. It's a technical
+demonstration of a converter/exchange UX and domain logic.
+
+## Features
+
+- Currency pair selector: fiat ↔ crypto, crypto ↔ crypto
+- Live exchange rate, fetched from public APIs (CoinGecko for crypto, Frankfurter
+  for fiat), cross-computed through a USD bridge
+- Transparent fee breakdown (exchanger fee shown separately from market rate)
+- Demo exchange requests, stored in `localStorage` (no backend/database)
+- Request detail page with live status (`pending` → `completed`, simulated)
+- Request history page
+- Light/dark theme
+- Demo banner communicating the non-real nature of the project
+
+## Tech stack
+
+| Area | Choice |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript (strict) |
+| Styling | Tailwind CSS v4 |
+| Theme | next-themes |
+| Icons | lucide-react |
+| Validation | zod-ready domain layer (see below) |
+| Data storage | `localStorage` only — no database or auth on this MVP |
+| Rate sources | CoinGecko (crypto→USD), Frankfurter (fiat→USD) |
+| Tests | Vitest, 100% coverage on domain logic |
+| Deploy target | Vercel |
+
+No database, ORM, or authentication in this iteration — deliberately, to keep the
+MVP small. See `PLAN.md` for the possible next iteration (persistent history via
+Postgres/Supabase).
+
+## Architecture
+
+- `src/lib/exchange-calc.ts` — pure domain functions: `computeExchangeAmount`,
+  `computeCrossRate`, `validateExchangeRequest`. No side effects, 100% test
+  coverage (`src/lib/__tests__`).
+- `src/lib/currencies.ts` — supported currency list (3 fiat, 6 crypto).
+- `src/lib/rates/providers.ts` + `src/lib/rates/cache.ts` — server-side rate
+  fetching with a 60s in-memory cache, to avoid hitting provider rate limits and
+  to keep the client decoupled from the rate provider.
+- `src/app/api/rates/route.ts` — Route Handler that exposes
+  `GET /api/rates?from=X&to=Y` → `{ rate, updatedAt }`.
+- `src/lib/history-store.ts` — `localStorage`-backed CRUD for exchange requests,
+  including the simulated auto-complete timer.
+- `src/components/exchange-calculator.tsx` — the main calculator UI.
+- `src/app/exchange/[id]/page.tsx`, `src/app/history/page.tsx` — request detail
+  and history screens.
+
+## Getting started
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+### Other scripts
+
+```bash
+npm run build          # production build
+npm run start           # run production build
+npm run lint             # eslint
+npm test                  # vitest (watch mode)
+npm run test:run          # vitest, single run
+npm run test:coverage     # vitest with coverage (100% required on src/lib)
+```
+
+## Testing approach
+
+The domain logic (rate/fee/cross-rate calculation and request validation) is
+covered at 100% with Vitest — this is the core of the app and the part worth
+guaranteeing correctness for. UI components and API routes are a thin layer on
+top and are intentionally left out of the coverage requirement.
+
+## Deployment
+
+Deploy target is Vercel (free tier). No environment variables are required — the
+rate providers (CoinGecko, Frankfurter) are used without API keys.
