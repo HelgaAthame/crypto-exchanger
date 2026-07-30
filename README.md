@@ -38,9 +38,48 @@ demonstration of a converter/exchange UX and domain logic.
 - Live rates ticker under the header: continuously scrolling pills with per-coin
   icons, USD price and 24h change, fed by the same real rate providers and
   refreshed every 60s
+- Multi-step simulated checkout: payment method → details → confirmation →
+  method-specific authorisation (3-D Secure style OTP for cards, deposit screen
+  for crypto) → animated status tracker
 - Demo exchange requests, stored in `localStorage` (no backend/database)
-- Request detail page with live status (`pending` → `completed`, simulated)
 - Request history page
+
+## Checkout flow
+
+After the calculator creates a request, the user walks through real checkout
+steps. Which steps appear depends on the chosen payment method:
+
+| Method | Steps |
+|---|---|
+| Card | method → details → confirm → OTP → status |
+| Bank transfer | method → details → confirm → status |
+| Crypto deposit | method → details → confirm → deposit → status |
+| Demo balance | method → confirm → status |
+
+**Step order is enforced by the request itself, not the URL.** Each request
+carries a `step` field; `resolveStepAccess` in `src/lib/checkout-flow.ts`
+compares the requested step against it and redirects if the user tries to skip
+ahead, while still allowing them to go back and change an earlier answer. That
+field is also what a future database schema would persist.
+
+The status page then walks a simulated pipeline — `awaiting payment → payment
+received → exchanging → sending → completed` — with a randomly generated
+transaction hash.
+
+### Why nothing can actually be paid
+
+The flow is designed to look real while making a real transfer impossible:
+
+- No payment provider is contacted; nothing entered leaves the browser.
+- The card number is fixed to the public `4242…` test number and cannot be
+  edited; only the last four digits are stored, never a CVC.
+- Crypto deposit addresses are deliberately malformed (`DEMO-…` prefix), so no
+  wallet will accept them as a destination.
+- The deposit QR is a decorative placeholder, not an encoded payment URI — it is
+  not scannable by design.
+- The IBAN shown for bank transfers belongs to no real account.
+- Every checkout step carries its own "no real payment is processed" notice on
+  top of the site-wide demo banner.
 - Light/dark theme, gold-on-black brand styling
 - Demo banner communicating the non-real nature of the project
 
@@ -102,8 +141,13 @@ Postgres/Supabase).
   with its USD price and 24h change, for the header ticker.
 - `src/components/rates-ticker.tsx`, `src/components/currency-icon.tsx` — the
   scrolling ticker and its inline (no external assets) coin icons.
+- `src/lib/checkout-flow.ts` — pure step-machine logic (`stepsForMethod`,
+  `nextStep`, `resolveStepAccess`), fully unit-tested.
 - `src/lib/history-store.ts` — `localStorage`-backed CRUD for exchange requests,
-  including the simulated auto-complete timer.
+  exposed to components through `src/lib/use-requests.ts` (`useSyncExternalStore`,
+  so screens update on change instead of polling).
+- `src/components/checkout/` — shared checkout chrome: step guard/shell, progress
+  indicator, and the deliberately non-scannable demo QR.
 - `src/components/exchange-calculator.tsx` — the main calculator UI.
 - `src/app/exchange/[id]/page.tsx`, `src/app/history/page.tsx` — request detail
   and history screens.
@@ -130,8 +174,8 @@ npm run test:coverage     # vitest with coverage (100% required on src/lib)
 
 ## Testing approach
 
-The domain logic (rate/fee/cross-rate calculation and request validation) is
-covered at 100% with Vitest — this is the core of the app and the part worth
+The domain logic (rate/fee/cross-rate calculation, request validation and the
+checkout step machine) is covered at 100% with Vitest — this is the core of the app and the part worth
 guaranteeing correctness for. UI components and API routes are a thin layer on
 top and are intentionally left out of the coverage requirement.
 

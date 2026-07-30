@@ -101,11 +101,11 @@ export function ExchangeCalculator() {
       rateAtCreation: rate,
       recipientContact: contact.trim(),
     });
-    router.push(`/exchange/${request.id}`);
+    router.push(`/exchange/${request.id}/method`);
   }
 
   return (
-    <div className="rounded-3xl border border-border bg-card p-5 shadow-2xl shadow-black/5 sm:p-7 dark:shadow-black/40">
+    <div className="surface-card rounded-3xl p-5 sm:p-7">
         <div className="relative flex flex-col gap-3">
           <div className="rounded-2xl bg-background/60 p-4">
             <CurrencySelect label="You give" value={giveCurrency} onChange={setGiveCurrency} />
@@ -240,7 +240,7 @@ export function ExchangeCalculator() {
           disabled={!result || rateLoading}
           className="gold-surface mt-5 w-full rounded-xl py-3.5 text-base font-semibold text-black shadow-lg shadow-accent/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 active:translate-y-0 disabled:pointer-events-none disabled:opacity-45"
         >
-          Create demo exchange request
+          Continue to payment
         </button>
 
         <p className="mt-3.5 flex items-center justify-center gap-1.5 text-xs text-muted">

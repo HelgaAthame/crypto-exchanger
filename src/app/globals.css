@@ -12,20 +12,26 @@
   --gold-light: #f4e2a1;
   --glow: rgba(201, 153, 47, 0.18);
   --shell: rgba(255, 255, 255, 0.72);
+  --card-shadow: 0 10px 30px -18px rgba(23, 21, 15, 0.25);
 }
 
 .dark {
   --background: #08080a;
   --foreground: #f2efe6;
   --muted: #9c968a;
-  --border: #2a2410;
-  --card: #131316;
+  --border: #35301c;
+  --card: #1a1a1f;
   --accent: #d4af37;
   --gold-dark: #7a5a17;
   --gold-mid: #c9992f;
   --gold-light: #f4e2a1;
   --glow: rgba(212, 175, 55, 0.14);
   --shell: rgba(19, 19, 22, 0.72);
+  /* Dark mode gets a gold rim-light instead of a drop shadow — a shadow is
+     invisible against a near-black page, so the card needs its own edge. */
+  --card-shadow:
+    0 0 0 1px rgba(212, 175, 55, 0.14),
+    0 24px 60px -30px rgba(212, 175, 55, 0.35);
 }
 
 @theme inline {
@@ -67,6 +73,12 @@ body {
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
+}
+
+.surface-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--card-shadow);
 }
 
 .ticker {

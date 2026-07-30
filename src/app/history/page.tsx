@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Clock, History as HistoryIcon } from "lucide-react";
-import { getAllRequests } from "@/lib/history-store";
+import { useAllRequests } from "@/lib/use-requests";
 import type { ExchangeRequest } from "@/types/exchange-request";
 
 const STATUS_STYLE: Record<ExchangeRequest["status"], string> = {
@@ -19,16 +18,7 @@ function formatAmount(value: number): string {
 }
 
 export default function HistoryPage() {
-  const [requests, setRequests] = useState<ExchangeRequest[]>([]);
-
-  useEffect(() => {
-    function load() {
-      setRequests(getAllRequests());
-    }
-    load();
-    const interval = window.setInterval(load, 2000);
-    return () => window.clearInterval(interval);
-  }, []);
+  const requests = useAllRequests() ?? [];
 
   return (
     <div className="mx-auto w-full max-w-xl px-5 pb-20 pt-12">
@@ -56,7 +46,7 @@ export default function HistoryPage() {
           {requests.map((r) => (
             <li key={r.id}>
               <Link
-                href={`/exchange/${r.id}`}
+                href={`/exchange/${r.id}${r.step === "status" ? "" : `/${r.step}`}`}
                 className="group block rounded-2xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-lg"
               >
                 <div className="flex items-center justify-between gap-3">
