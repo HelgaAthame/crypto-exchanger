@@ -108,6 +108,11 @@ body {
 
 .ticker {
   overflow: hidden;
+  /* The clip box has to be taller than the pills, or `overflow: hidden` cuts
+     off their hover glow and lift. Padding grows it; the matching negative
+     margin keeps the header row the same height. */
+  padding-block: 14px;
+  margin-block: -14px;
   mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
   -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
 }
