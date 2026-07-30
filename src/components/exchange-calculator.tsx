@@ -4,10 +4,18 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowUpDown, Loader2, ShieldCheck, TriangleAlert } from "lucide-react";
 import { CurrencySelect } from "@/components/currency-select";
+import { OperationTabs } from "@/components/operation-tabs";
 import { computeExchangeAmount, validateExchangeRequest } from "@/lib/exchange-calc";
 import { DEFAULT_FEE_PERCENT, MAX_AMOUNT_USD, MIN_AMOUNT_USD } from "@/lib/limits";
 import { createRequest } from "@/lib/history-store";
-import { isSupportedCurrency } from "@/lib/currencies";
+import { CRYPTO_CURRENCIES, FIAT_CURRENCIES, isSupportedCurrency } from "@/lib/currencies";
+import {
+  defaultPairForMode,
+  invertMode,
+  kindsForMode,
+  payoutLabelForMode,
+  type OperationMode,
+} from "@/lib/operations";
 
 type RateResponse = { rate: number; updatedAt: string };
 
@@ -20,6 +28,7 @@ function formatAmount(value: number): string {
 
 export function ExchangeCalculator() {
   const router = useRouter();
+  const [mode, setMode] = useState<OperationMode>("buy");
   const [giveCurrency, setGiveCurrency] = useState("USD");
   const [receiveCurrency, setReceiveCurrency] = useState("BTC");
   const [giveAmount, setGiveAmount] = useState("100");
@@ -66,7 +75,21 @@ export function ExchangeCalculator() {
         })
       : null;
 
+  const kinds = kindsForMode(mode);
+  const giveOptions = kinds.give === "fiat" ? FIAT_CURRENCIES : CRYPTO_CURRENCIES;
+  const receiveOptions = kinds.receive === "fiat" ? FIAT_CURRENCIES : CRYPTO_CURRENCIES;
+
+  function changeMode(next: OperationMode) {
+    setMode(next);
+    // Snap to a pair the new mode actually allows.
+    const pair = defaultPairForMode(next);
+    setGiveCurrency(pair.give);
+    setReceiveCurrency(pair.receive);
+  }
+
   function swapCurrencies() {
+    // Flipping the sides of a Buy is a Sell, so the mode follows the pair.
+    setMode(invertMode(mode));
     setGiveCurrency(receiveCurrency);
     setReceiveCurrency(giveCurrency);
   }
@@ -93,6 +116,7 @@ export function ExchangeCalculator() {
     }
 
     const request = createRequest({
+      mode,
       giveCurrency,
       receiveCurrency,
       giveAmount: result.giveAmount,
@@ -106,9 +130,18 @@ export function ExchangeCalculator() {
 
   return (
     <div className="surface-card rounded-3xl p-5 sm:p-7">
+        <div className="mb-5">
+          <OperationTabs value={mode} onChange={changeMode} />
+        </div>
+
         <div className="relative flex flex-col gap-3">
           <div className="rounded-2xl bg-background/60 p-4">
-            <CurrencySelect label="You give" value={giveCurrency} onChange={setGiveCurrency} />
+            <CurrencySelect
+              label="You give"
+              value={giveCurrency}
+              onChange={setGiveCurrency}
+              options={giveOptions}
+            />
             <label className="mt-3 flex flex-col gap-1.5">
               <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
                 Amount
@@ -140,6 +173,7 @@ export function ExchangeCalculator() {
               label="You receive"
               value={receiveCurrency}
               onChange={setReceiveCurrency}
+              options={receiveOptions}
             />
             <div className="mt-3">
               <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
@@ -216,7 +250,7 @@ export function ExchangeCalculator() {
 
         <label className="mt-4 flex flex-col gap-1.5">
           <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-            Contact — demo, any email or string
+            Contact for your {payoutLabelForMode(mode)} — demo, any email
           </span>
           <input
             type="text"

@@ -31,6 +31,9 @@ demonstration of a converter/exchange UX and domain logic.
 
 ## Features
 
+- Operation switcher — **Buy** (fiat → crypto), **Sell** (crypto → fiat),
+  **Swap** (crypto → crypto) and **Exchange** (fiat → fiat) — as a segmented
+  control that narrows both currency lists to the pair the mode allows
 - Currency pair selector: fiat ↔ crypto, crypto ↔ crypto (4 fiat, 6 crypto)
 - Live exchange rate, fetched from public APIs (CoinGecko for crypto, Frankfurter
   for fiat), cross-computed through a USD bridge
@@ -141,6 +144,9 @@ Postgres/Supabase).
   with its USD price and 24h change, for the header ticker.
 - `src/components/rates-ticker.tsx`, `src/components/currency-icon.tsx` — the
   scrolling ticker and its inline (no external assets) coin icons.
+- `src/lib/operations.ts` — pure operation-mode rules (`kindsForMode`,
+  `defaultPairForMode`, `invertMode`), unit-tested. Swapping the sides of a Buy
+  flips the mode to Sell, so the control always matches the pair.
 - `src/lib/checkout-flow.ts` — pure step-machine logic (`stepsForMethod`,
   `nextStep`, `resolveStepAccess`), fully unit-tested.
 - `src/lib/history-store.ts` — `localStorage`-backed CRUD for exchange requests,
@@ -178,6 +184,20 @@ The domain logic (rate/fee/cross-rate calculation, request validation and the
 checkout step machine) is covered at 100% with Vitest — this is the core of the app and the part worth
 guaranteeing correctness for. UI components and API routes are a thin layer on
 top and are intentionally left out of the coverage requirement.
+
+## Error and loading states
+
+- `src/app/not-found.tsx` — branded 404 with routes back into the app.
+- `src/app/error.tsx` — route-level error boundary with a retry action; it names
+  third-party rate limits as the likely cause, since that is the realistic
+  failure here.
+- `src/app/global-error.tsx` — fallback for failures in the root layout itself,
+  with inline styles because the normal shell is unavailable at that point.
+- `src/app/loading.tsx` — shared route loading state.
+
+Requests saved before the checkout flow existed are migrated on read
+(`normalizeRequest`) — without that, their missing `step` produced
+`/exchange/<id>/undefined` links.
 
 ## Deployment
 

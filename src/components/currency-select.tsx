@@ -1,13 +1,20 @@
 import { ChevronDown } from "lucide-react";
-import { ALL_CURRENCIES } from "@/lib/currencies";
+import { ALL_CURRENCIES, type Currency } from "@/lib/currencies";
 
 type CurrencySelectProps = {
   value: string;
   onChange: (code: string) => void;
   label: string;
+  /** Defaults to every supported currency; modes narrow this down. */
+  options?: Currency[];
 };
 
-export function CurrencySelect({ value, onChange, label }: CurrencySelectProps) {
+export function CurrencySelect({
+  value,
+  onChange,
+  label,
+  options = ALL_CURRENCIES,
+}: CurrencySelectProps) {
   return (
     <label className="flex flex-col gap-1.5">
       <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
@@ -19,7 +26,7 @@ export function CurrencySelect({ value, onChange, label }: CurrencySelectProps) 
           onChange={(e) => onChange(e.target.value)}
           className="w-full appearance-none rounded-xl border border-border bg-background px-4 py-3 pr-10 text-sm font-medium transition-colors hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
         >
-          {ALL_CURRENCIES.map((currency) => (
+          {options.map((currency) => (
             <option key={currency.code} value={currency.code}>
               {currency.code} — {currency.name}
             </option>

@@ -8,12 +8,26 @@ import type {
 
 const STORAGE_KEY = "crypto-exchanger:requests";
 
+/**
+ * Requests saved before the checkout flow existed have no `step`, which would
+ * produce URLs like `/exchange/<id>/undefined`. Treat those as finished, since
+ * the old flow completed as soon as the request was created.
+ */
+export function normalizeRequest(request: ExchangeRequest): ExchangeRequest {
+  if (request.step) return request;
+  return {
+    ...request,
+    step: "status",
+    stage: request.status === "completed" ? "completed" : "awaiting-payment",
+  };
+}
+
 function readAll(): ExchangeRequest[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    return JSON.parse(raw) as ExchangeRequest[];
+    return (JSON.parse(raw) as ExchangeRequest[]).map(normalizeRequest);
   } catch {
     return [];
   }

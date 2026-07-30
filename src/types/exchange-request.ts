@@ -1,3 +1,5 @@
+import type { OperationMode } from "@/lib/operations";
+
 export type ExchangeRequestStatus = "pending" | "completed" | "cancelled";
 
 export type PaymentMethod = "card" | "bank" | "crypto" | "demo-balance";
@@ -35,6 +37,8 @@ export type ExchangeRequest = {
   id: string;
   createdAt: string;
   status: ExchangeRequestStatus;
+  /** Which operation the user picked: buy, sell, swap or exchange. */
+  mode?: OperationMode;
   giveCurrency: string;
   receiveCurrency: string;
   giveAmount: number;

@@ -1,13 +1,17 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { getRequestsSnapshot, subscribeToRequests } from "@/lib/history-store";
+import {
+  getRequestsSnapshot,
+  normalizeRequest,
+  subscribeToRequests,
+} from "@/lib/history-store";
 import type { ExchangeRequest } from "@/types/exchange-request";
 
 function parse(raw: string): ExchangeRequest[] {
   if (!raw) return [];
   try {
-    return JSON.parse(raw) as ExchangeRequest[];
+    return (JSON.parse(raw) as ExchangeRequest[]).map(normalizeRequest);
   } catch {
     return [];
   }

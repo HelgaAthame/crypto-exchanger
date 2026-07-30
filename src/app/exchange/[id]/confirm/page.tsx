@@ -6,6 +6,7 @@ import { Lock, Timer } from "lucide-react";
 import { CheckoutShell } from "@/components/checkout/checkout-shell";
 import { nextStep } from "@/lib/checkout-flow";
 import { setStep, startProcessing } from "@/lib/history-store";
+import { OPERATION_MODES } from "@/lib/operations";
 import type { ExchangeRequest, PaymentMethod } from "@/types/exchange-request";
 
 const RATE_LOCK_SECONDS = 120;
@@ -76,6 +77,14 @@ export default function ConfirmPage() {
             </div>
 
             <dl className="mt-4 flex flex-col gap-2.5 border-t border-border/70 pt-4 text-sm">
+              {request.mode && (
+                <Row
+                  label="Operation"
+                  value={
+                    OPERATION_MODES.find((m) => m.id === request.mode)?.label ?? request.mode
+                  }
+                />
+              )}
               <Row
                 label="Rate"
                 value={`1 ${request.giveCurrency} = ${formatAmount(request.rateAtCreation)} ${request.receiveCurrency}`}
