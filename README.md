@@ -265,5 +265,28 @@ Requests saved before the checkout flow existed are migrated on read
 
 ## Deployment
 
-Deploy target is Vercel (free tier). No environment variables are required — the
-rate providers (CoinGecko, Frankfurter) are used without API keys.
+Deployed on Vercel (free tier).
+
+1. Push the repository to GitHub.
+2. Import it at [vercel.com/new](https://vercel.com/new) — Next.js is detected
+   automatically, so the build command and output directory need no changes.
+3. Deploy. Every later push to `main` ships a production deployment, and pull
+   requests get preview URLs.
+
+**Environment variables — none are required.** Both rate providers (CoinGecko and
+Frankfurter) are public and keyless, so the app builds and runs with an empty
+environment.
+
+One variable is optional: `NEXT_PUBLIC_SITE_URL` (e.g.
+`https://crypto-exchanger.vercel.app`). It is used only to build absolute URLs
+inside the breadcrumb JSON-LD; without it those URLs fall back to a placeholder
+host, which affects search-engine rich results but nothing a visitor sees. Set it
+once the production domain is known.
+
+### Rate limits in production
+
+CoinGecko's keyless tier is rate-limited, and every serverless instance keeps its
+own in-memory cache, so a busy deployment can hit the limit and surface the
+"Could not load live rate" state. The fix — if this ever moves past a demo — is a
+shared cache (Vercel KV or Redis) behind `src/lib/rates/cache.ts`, which is
+already the single place every rate read goes through.

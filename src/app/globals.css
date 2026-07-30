@@ -123,10 +123,12 @@ body {
   animation: ticker-scroll 45s linear infinite;
 }
 
-/* Focus-within matters as much as hover: without it a keyboard user can never
-   reach a pill, because it scrolls out from under them. */
+/* Keyboard focus must pause the marquee, or a pill scrolls out from under the
+   user before they can reach it. Matching :focus-visible rather than
+   :focus-within keeps a mouse click from freezing the strip for good — after a
+   click the link keeps focus, and the ticker would never resume. */
 .ticker:hover .ticker-track,
-.ticker:focus-within .ticker-track,
+.ticker:has(:focus-visible) .ticker-track,
 .ticker-track[data-paused] {
   animation-play-state: paused;
 }
