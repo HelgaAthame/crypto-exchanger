@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { DemoBanner } from "@/components/demo-banner";
 import { NavBar } from "@/components/nav-bar";
+import { RatesTicker } from "@/components/rates-ticker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RateBridge — demo exchange calculator",
+  title: "Crypto Exchanger — demo exchange calculator",
   description:
     "A portfolio demo project: live fiat/crypto exchange rate calculator. No real funds are transferred.",
 };
@@ -36,6 +37,7 @@ export default function RootLayout({
         <ThemeProvider>
           <DemoBanner />
           <NavBar />
+          <RatesTicker />
           <main className="flex-1">{children}</main>
         </ThemeProvider>
       </body>

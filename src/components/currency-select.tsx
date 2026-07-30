@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import { ALL_CURRENCIES } from "@/lib/currencies";
 
 type CurrencySelectProps = {
@@ -8,19 +9,27 @@ type CurrencySelectProps = {
 
 export function CurrencySelect({ value, onChange, label }: CurrencySelectProps) {
   return (
-    <label className="flex flex-col gap-1 text-sm">
-      <span className="text-muted">{label}</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="border border-border rounded-md px-3 py-2 bg-background"
-      >
-        {ALL_CURRENCIES.map((currency) => (
-          <option key={currency.code} value={currency.code}>
-            {currency.code} — {currency.name}
-          </option>
-        ))}
-      </select>
+    <label className="flex flex-col gap-1.5">
+      <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
+        {label}
+      </span>
+      <span className="relative">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full appearance-none rounded-xl border border-border bg-background px-4 py-3 pr-10 text-sm font-medium transition-colors hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
+        >
+          {ALL_CURRENCIES.map((currency) => (
+            <option key={currency.code} value={currency.code}>
+              {currency.code} — {currency.name}
+            </option>
+          ))}
+        </select>
+        <ChevronDown
+          className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-muted"
+          aria-hidden
+        />
+      </span>
     </label>
   );
 }

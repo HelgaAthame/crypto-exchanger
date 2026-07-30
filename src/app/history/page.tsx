@@ -2,8 +2,21 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowRight, Clock, History as HistoryIcon } from "lucide-react";
 import { getAllRequests } from "@/lib/history-store";
 import type { ExchangeRequest } from "@/types/exchange-request";
+
+const STATUS_STYLE: Record<ExchangeRequest["status"], string> = {
+  pending: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  completed: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  cancelled: "border-border bg-card text-muted",
+};
+
+function formatAmount(value: number): string {
+  if (value >= 1000) return value.toLocaleString("en-US", { maximumFractionDigits: 2 });
+  if (value >= 1) return value.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+  return value.toFixed(8).replace(/0+$/, "").replace(/\.$/, "");
+}
 
 export default function HistoryPage() {
   const [requests, setRequests] = useState<ExchangeRequest[]>([]);
@@ -18,45 +31,56 @@ export default function HistoryPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-md w-full px-4 py-8 flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">History</h1>
-        <p className="text-sm text-muted mt-1">
-          Requests stored locally in this browser only.
+    <div className="mx-auto w-full max-w-xl px-5 pb-20 pt-12">
+      <div className="mb-7">
+        <h1 className="text-3xl font-semibold tracking-tight">Request history</h1>
+        <p className="mt-2 text-sm text-muted">
+          Demo requests stored in this browser only — nothing is sent to a server.
         </p>
       </div>
 
-      {requests.length === 0 && (
-        <p className="text-sm text-muted">
-          No requests yet.{" "}
-          <Link href="/" className="text-accent hover:underline">
-            Create one
+      {requests.length === 0 ? (
+        <div className="rounded-3xl border border-border bg-card p-10 text-center">
+          <HistoryIcon className="mx-auto size-8 text-accent/60" aria-hidden />
+          <p className="mt-4 text-sm text-muted">No requests yet.</p>
+          <Link
+            href="/"
+            className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
+          >
+            Create your first one
+            <ArrowRight className="size-3.5" aria-hidden />
           </Link>
-          .
-        </p>
+        </div>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {requests.map((r) => (
+            <li key={r.id}>
+              <Link
+                href={`/exchange/${r.id}`}
+                className="group block rounded-2xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex flex-wrap items-baseline gap-1.5 text-sm font-medium tabular-nums">
+                    {formatAmount(r.giveAmount)} {r.giveCurrency}
+                    <ArrowRight className="size-3.5 text-accent" aria-hidden />
+                    <span className="gold-text">{formatAmount(r.receiveAmount)}</span>{" "}
+                    {r.receiveCurrency}
+                  </span>
+                  <span
+                    className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-medium capitalize ${STATUS_STYLE[r.status]}`}
+                  >
+                    {r.status}
+                  </span>
+                </div>
+                <p className="mt-2 flex items-center gap-1.5 text-xs text-muted">
+                  <Clock className="size-3" aria-hidden />
+                  {new Date(r.createdAt).toLocaleString()}
+                </p>
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
-
-      <ul className="flex flex-col gap-3">
-        {requests.map((r) => (
-          <li key={r.id}>
-            <Link
-              href={`/exchange/${r.id}`}
-              className="block bg-card border border-border rounded-lg p-4 text-sm hover:border-accent"
-            >
-              <div className="flex justify-between">
-                <span>
-                  {r.giveAmount.toFixed(4)} {r.giveCurrency} → {r.receiveAmount.toFixed(4)}{" "}
-                  {r.receiveCurrency}
-                </span>
-                <span className="text-muted capitalize">{r.status}</span>
-              </div>
-              <div className="text-muted text-xs mt-1">
-                {new Date(r.createdAt).toLocaleString()}
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }

@@ -11,24 +11,34 @@ const COINGECKO_IDS: Record<string, string> = {
 
 type UsdRates = Record<string, number>;
 
-async function fetchCryptoUsdRates(): Promise<UsdRates> {
+async function fetchCryptoUsdRates(): Promise<{
+  rates: UsdRates;
+  changes24h: Record<string, number>;
+}> {
   const ids = CRYPTO_CURRENCIES.map((c) => COINGECKO_IDS[c.code]).join(",");
-  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
   const res = await fetch(url, { next: { revalidate: 0 } });
   if (!res.ok) {
     throw new Error(`CoinGecko request failed: ${res.status}`);
   }
-  const data = (await res.json()) as Record<string, { usd: number }>;
+  const data = (await res.json()) as Record<
+    string,
+    { usd: number; usd_24h_change?: number }
+  >;
 
-  const result: UsdRates = {};
+  const rates: UsdRates = {};
+  const changes24h: Record<string, number> = {};
   for (const currency of CRYPTO_CURRENCIES) {
     const id = COINGECKO_IDS[currency.code];
-    const usd = data[id]?.usd;
-    if (typeof usd === "number") {
-      result[currency.code] = usd;
+    const entry = data[id];
+    if (typeof entry?.usd === "number") {
+      rates[currency.code] = entry.usd;
+    }
+    if (typeof entry?.usd_24h_change === "number") {
+      changes24h[currency.code] = entry.usd_24h_change;
     }
   }
-  return result;
+  return { rates, changes24h };
 }
 
 async function fetchFiatUsdRates(): Promise<UsdRates> {
@@ -50,7 +60,10 @@ async function fetchFiatUsdRates(): Promise<UsdRates> {
   return result;
 }
 
-export async function fetchAllUsdRates(): Promise<UsdRates> {
+export async function fetchAllUsdRates(): Promise<{
+  rates: UsdRates;
+  changes24h: Record<string, number>;
+}> {
   const [crypto, fiat] = await Promise.all([fetchCryptoUsdRates(), fetchFiatUsdRates()]);
-  return { ...crypto, ...fiat };
+  return { rates: { ...crypto.rates, ...fiat }, changes24h: crypto.changes24h };
 }

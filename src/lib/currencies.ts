@@ -6,10 +6,13 @@ export type Currency = {
   kind: CurrencyKind;
 };
 
+// Fiat codes must be ones Frankfurter still publishes — it dropped RUB, so a
+// rouble pair would return "rate unavailable" at runtime.
 export const FIAT_CURRENCIES: Currency[] = [
   { code: "USD", name: "US Dollar", kind: "fiat" },
   { code: "EUR", name: "Euro", kind: "fiat" },
-  { code: "RUB", name: "Russian Ruble", kind: "fiat" },
+  { code: "GBP", name: "British Pound", kind: "fiat" },
+  { code: "JPY", name: "Japanese Yen", kind: "fiat" },
 ];
 
 export const CRYPTO_CURRENCIES: Currency[] = [

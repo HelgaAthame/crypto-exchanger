@@ -1,4 +1,4 @@
-# RateBridge
+# Crypto Exchanger
 
 A portfolio demo project: a fiat/crypto exchange rate calculator with live rates
 and simulated exchange requests.
@@ -9,7 +9,7 @@ and simulated exchange requests.
 
 ## What this is
 
-RateBridge lets a user pick a currency to give and a currency to receive
+Crypto Exchanger lets a user pick a currency to give and a currency to receive
 (fiat → crypto, crypto → fiat, or crypto → crypto), enter an amount, and see the
 live exchange rate together with the exchanger's fee and the resulting amount.
 The user can then create a demo exchange request, which is stored locally in the
@@ -31,15 +31,41 @@ demonstration of a converter/exchange UX and domain logic.
 
 ## Features
 
-- Currency pair selector: fiat ↔ crypto, crypto ↔ crypto
+- Currency pair selector: fiat ↔ crypto, crypto ↔ crypto (4 fiat, 6 crypto)
 - Live exchange rate, fetched from public APIs (CoinGecko for crypto, Frankfurter
   for fiat), cross-computed through a USD bridge
 - Transparent fee breakdown (exchanger fee shown separately from market rate)
+- Live rates ticker under the header: continuously scrolling pills with per-coin
+  icons, USD price and 24h change, fed by the same real rate providers and
+  refreshed every 60s
 - Demo exchange requests, stored in `localStorage` (no backend/database)
 - Request detail page with live status (`pending` → `completed`, simulated)
 - Request history page
-- Light/dark theme
+- Light/dark theme, gold-on-black brand styling
 - Demo banner communicating the non-real nature of the project
+
+## Brand and design
+
+The visual identity is built around the project's gold "E-in-a-loop" mark:
+
+- `public/logo/logo-mark.png|svg` — icon-only mark, transparent background,
+  derived from the original render by using per-pixel brightness as an alpha
+  channel (keeps the metallic gradient instead of flattening it to vector paths).
+- `public/logo/logo-full.png|svg` — full lockup with the "CRYPTO EXCHANGER"
+  wordmark.
+- `src/app/favicon.ico` — generated from the mark, tightly cropped with no empty
+  padding, at 16/32/48/64px with a saturation lift so it stays legible when small.
+
+Design tokens live in `src/app/globals.css`: a gold accent scale
+(`--gold-dark/mid/light`) applied over a near-black dark theme and a warm light
+theme, plus `.gold-text` / `.gold-surface` helpers for gradient text and the
+primary CTA. The landing page uses a two-column hero (copy and highlights on the
+left, calculator card on the right) so wide screens don't leave empty gutters.
+Interactive elements share one animation language: lift on hover, press down on
+active, gold focus ring for keyboard users, and everything decorative disabled
+under `prefers-reduced-motion`.
+
+See `PLAN.md` sections 12–13 for the full brand/design specification.
 
 ## Tech stack
 
@@ -65,12 +91,17 @@ Postgres/Supabase).
 - `src/lib/exchange-calc.ts` — pure domain functions: `computeExchangeAmount`,
   `computeCrossRate`, `validateExchangeRequest`. No side effects, 100% test
   coverage (`src/lib/__tests__`).
-- `src/lib/currencies.ts` — supported currency list (3 fiat, 6 crypto).
+- `src/lib/currencies.ts` — supported currency list (4 fiat, 6 crypto). Fiat codes
+  are limited to ones Frankfurter still publishes.
 - `src/lib/rates/providers.ts` + `src/lib/rates/cache.ts` — server-side rate
   fetching with a 60s in-memory cache, to avoid hitting provider rate limits and
   to keep the client decoupled from the rate provider.
 - `src/app/api/rates/route.ts` — Route Handler that exposes
   `GET /api/rates?from=X&to=Y` → `{ rate, updatedAt }`.
+- `src/app/api/ticker/route.ts` — `GET /api/ticker` → every supported currency
+  with its USD price and 24h change, for the header ticker.
+- `src/components/rates-ticker.tsx`, `src/components/currency-icon.tsx` — the
+  scrolling ticker and its inline (no external assets) coin icons.
 - `src/lib/history-store.ts` — `localStorage`-backed CRUD for exchange requests,
   including the simulated auto-complete timer.
 - `src/components/exchange-calculator.tsx` — the main calculator UI.

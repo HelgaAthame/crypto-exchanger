@@ -1,21 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --muted: #6b7280;
-  --border: #e5e7eb;
-  --card: #f9fafb;
-  --accent: #2563eb;
+  --background: #f7f6f3;
+  --foreground: #17150f;
+  --muted: #6b6659;
+  --border: #e6e1d6;
+  --card: #ffffff;
+  --accent: #a17a1f;
+  --gold-dark: #7a5a17;
+  --gold-mid: #c9992f;
+  --gold-light: #f4e2a1;
+  --glow: rgba(201, 153, 47, 0.18);
+  --shell: rgba(255, 255, 255, 0.72);
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --muted: #9ca3af;
-  --border: #27272a;
-  --card: #111113;
-  --accent: #3b82f6;
+  --background: #08080a;
+  --foreground: #f2efe6;
+  --muted: #9c968a;
+  --border: #2a2410;
+  --card: #131316;
+  --accent: #d4af37;
+  --gold-dark: #7a5a17;
+  --gold-mid: #c9992f;
+  --gold-light: #f4e2a1;
+  --glow: rgba(212, 175, 55, 0.14);
+  --shell: rgba(19, 19, 22, 0.72);
 }
 
 @theme inline {
@@ -25,6 +35,10 @@
   --color-border: var(--border);
   --color-card: var(--card);
   --color-accent: var(--accent);
+  --color-gold-dark: var(--gold-dark);
+  --color-gold-mid: var(--gold-mid);
+  --color-gold-light: var(--gold-light);
+  --color-shell: var(--shell);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -32,5 +46,121 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background-image: radial-gradient(
+    ellipse 80% 55% at 50% 0%,
+    var(--glow) 0%,
+    transparent 70%
+  );
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.gold-text {
+  background: linear-gradient(
+    135deg,
+    var(--gold-dark) 0%,
+    var(--gold-light) 40%,
+    var(--gold-mid) 70%,
+    var(--gold-dark) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.ticker {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker-scroll 45s linear infinite;
+}
+
+.ticker:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+.ticker-list {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* Two identical copies sit side by side, so shifting by exactly half the
+       track length loops seamlessly. */
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker {
+    overflow-x: auto;
+  }
+
+  .ticker-track {
+    animation: none;
+  }
+}
+
+.ticker-pill {
+  transition:
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ticker-pill:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow:
+    0 6px 18px -6px color-mix(in srgb, var(--accent) 60%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise-in {
+  animation: rise-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise-in,
+  .ticker-pill {
+    animation: none;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .ticker-pill:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+.gold-surface {
+  background: linear-gradient(
+    135deg,
+    var(--gold-light) 0%,
+    var(--gold-mid) 45%,
+    var(--gold-dark) 100%
+  );
 }

@@ -2,14 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowUpDown, Loader2, ShieldCheck, TriangleAlert } from "lucide-react";
 import { CurrencySelect } from "@/components/currency-select";
-import { computeExchangeAmount } from "@/lib/exchange-calc";
+import { computeExchangeAmount, validateExchangeRequest } from "@/lib/exchange-calc";
 import { DEFAULT_FEE_PERCENT, MAX_AMOUNT_USD, MIN_AMOUNT_USD } from "@/lib/limits";
 import { createRequest } from "@/lib/history-store";
-import { validateExchangeRequest } from "@/lib/exchange-calc";
 import { isSupportedCurrency } from "@/lib/currencies";
 
 type RateResponse = { rate: number; updatedAt: string };
+
+function formatAmount(value: number): string {
+  if (value === 0) return "0";
+  if (value >= 1000) return value.toLocaleString("en-US", { maximumFractionDigits: 2 });
+  if (value >= 1) return value.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+  return value.toFixed(8).replace(/0+$/, "").replace(/\.$/, "");
+}
 
 export function ExchangeCalculator() {
   const router = useRouter();
@@ -29,9 +36,7 @@ export function ExchangeCalculator() {
       setRateLoading(true);
       setRateError(null);
       try {
-        const res = await fetch(
-          `/api/rates?from=${giveCurrency}&to=${receiveCurrency}`
-        );
+        const res = await fetch(`/api/rates?from=${giveCurrency}&to=${receiveCurrency}`);
         if (!res.ok) throw new Error("failed");
         const data = (await res.json()) as RateResponse;
         if (!cancelled) {
@@ -100,96 +105,148 @@ export function ExchangeCalculator() {
   }
 
   return (
-    <div className="mx-auto max-w-md w-full px-4 py-8 flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Exchange calculator</h1>
-        <p className="text-sm text-muted mt-1">
-          Live rates, transparent fee, simulated requests.
-        </p>
-      </div>
+    <div className="rounded-3xl border border-border bg-card p-5 shadow-2xl shadow-black/5 sm:p-7 dark:shadow-black/40">
+        <div className="relative flex flex-col gap-3">
+          <div className="rounded-2xl bg-background/60 p-4">
+            <CurrencySelect label="You give" value={giveCurrency} onChange={setGiveCurrency} />
+            <label className="mt-3 flex flex-col gap-1.5">
+              <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
+                Amount
+              </span>
+              <input
+                type="number"
+                min={0}
+                value={giveAmount}
+                onChange={(e) => setGiveAmount(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-2xl font-semibold tabular-nums transition-colors hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
+              />
+            </label>
+          </div>
 
-      <div className="flex flex-col gap-3 bg-card border border-border rounded-lg p-4">
-        <CurrencySelect label="You give" value={giveCurrency} onChange={setGiveCurrency} />
+          <button
+            type="button"
+            onClick={swapCurrencies}
+            aria-label="Swap currencies"
+            className="group absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-border bg-card p-2.5 text-accent shadow-lg transition-all duration-300 hover:scale-110 hover:border-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 active:scale-95"
+          >
+            <ArrowUpDown
+              className="size-4 transition-transform duration-300 group-hover:rotate-180"
+              aria-hidden
+            />
+          </button>
 
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-muted">Amount</span>
+          <div className="rounded-2xl bg-background/60 p-4">
+            <CurrencySelect
+              label="You receive"
+              value={receiveCurrency}
+              onChange={setReceiveCurrency}
+            />
+            <div className="mt-3">
+              <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
+                Estimated amount
+              </span>
+              <p className="mt-1.5 min-h-10 text-3xl font-semibold tabular-nums">
+                {rateLoading ? (
+                  <Loader2 className="size-6 animate-spin text-muted" aria-label="Loading" />
+                ) : result ? (
+                  <>
+                    <span className="gold-text">{formatAmount(result.receiveAmount)}</span>{" "}
+                    <span className="text-lg font-medium text-muted">{receiveCurrency}</span>
+                  </>
+                ) : (
+                  <span className="text-lg font-normal text-muted">—</span>
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-border/70 p-4 text-sm">
+          {rateError ? (
+            <p className="flex items-center gap-2 text-red-500">
+              <TriangleAlert className="size-4 shrink-0" aria-hidden />
+              {rateError}
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2.5">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-muted">Market rate</span>
+                <span className="tabular-nums">
+                  {rate ? (
+                    <>
+                      1 {giveCurrency} = {formatAmount(rate)} {receiveCurrency}
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-muted">Service fee ({DEFAULT_FEE_PERCENT}%)</span>
+                <span className="tabular-nums">
+                  {result ? (
+                    <>
+                      {formatAmount(result.feeAmount)} {receiveCurrency}
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between gap-3 border-t border-border/70 pt-2.5 font-medium">
+                <span>You receive</span>
+                <span className="tabular-nums">
+                  {result ? (
+                    <>
+                      {formatAmount(result.receiveAmount)} {receiveCurrency}
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </span>
+              </div>
+              {rateUpdatedAt && (
+                <p className="text-xs text-muted">
+                  Updated {new Date(rateUpdatedAt).toLocaleTimeString()}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        <label className="mt-4 flex flex-col gap-1.5">
+          <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
+            Contact — demo, any email or string
+          </span>
           <input
-            type="number"
-            min={0}
-            value={giveAmount}
-            onChange={(e) => setGiveAmount(e.target.value)}
-            className="border border-border rounded-md px-3 py-2 bg-background"
+            type="text"
+            value={contact}
+            onChange={(e) => setContact(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm transition-colors hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
           />
         </label>
 
+        {submitError && (
+          <p className="mt-3 flex items-center gap-2 text-sm text-red-500">
+            <TriangleAlert className="size-4 shrink-0" aria-hidden />
+            {submitError}
+          </p>
+        )}
+
         <button
           type="button"
-          onClick={swapCurrencies}
-          className="self-center text-xs text-accent hover:underline"
+          onClick={handleCreateRequest}
+          disabled={!result || rateLoading}
+          className="gold-surface mt-5 w-full rounded-xl py-3.5 text-base font-semibold text-black shadow-lg shadow-accent/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 active:translate-y-0 disabled:pointer-events-none disabled:opacity-45"
         >
-          ⇅ swap
+          Create demo exchange request
         </button>
 
-        <CurrencySelect
-          label="You receive"
-          value={receiveCurrency}
-          onChange={setReceiveCurrency}
-        />
-      </div>
-
-      <div className="bg-card border border-border rounded-lg p-4 text-sm flex flex-col gap-2">
-        {rateLoading && <p className="text-muted">Loading live rate…</p>}
-        {rateError && <p className="text-red-500">{rateError}</p>}
-        {result && rate && !rateLoading && !rateError && (
-          <>
-            <div className="flex justify-between">
-              <span className="text-muted">Exchange rate</span>
-              <span>
-                1 {giveCurrency} = {rate.toFixed(6)} {receiveCurrency}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted">Fee ({DEFAULT_FEE_PERCENT}%)</span>
-              <span>
-                {result.feeAmount.toFixed(6)} {receiveCurrency}
-              </span>
-            </div>
-            <div className="flex justify-between font-medium">
-              <span>You receive</span>
-              <span>
-                {result.receiveAmount.toFixed(6)} {receiveCurrency}
-              </span>
-            </div>
-            {rateUpdatedAt && (
-              <p className="text-xs text-muted">
-                Updated {new Date(rateUpdatedAt).toLocaleTimeString()}
-              </p>
-            )}
-          </>
-        )}
-      </div>
-
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="text-muted">Contact (demo — email or any string)</span>
-        <input
-          type="text"
-          value={contact}
-          onChange={(e) => setContact(e.target.value)}
-          placeholder="you@example.com"
-          className="border border-border rounded-md px-3 py-2 bg-background"
-        />
-      </label>
-
-      {submitError && <p className="text-sm text-red-500">{submitError}</p>}
-
-      <button
-        type="button"
-        onClick={handleCreateRequest}
-        disabled={!result || rateLoading}
-        className="bg-accent text-white rounded-md py-2 font-medium disabled:opacity-50"
-      >
-        Create demo exchange request
-      </button>
+        <p className="mt-3.5 flex items-center justify-center gap-1.5 text-xs text-muted">
+          <ShieldCheck className="size-3.5 text-accent" aria-hidden />
+        Simulated request — nothing is charged and no funds move
+      </p>
     </div>
   );
 }
