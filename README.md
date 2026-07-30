@@ -185,6 +185,41 @@ checkout step machine) is covered at 100% with Vitest — this is the core of th
 guaranteeing correctness for. UI components and API routes are a thin layer on
 top and are intentionally left out of the coverage requirement.
 
+## Accessibility
+
+Built to **WCAG 2.2 level AA** (which includes all level A criteria). The parts
+that needed deliberate work:
+
+- **2.2.2 Pause, Stop, Hide** — the rates ticker auto-scrolls for longer than
+  five seconds, so it has a real pause button. Hover-to-pause alone fails this,
+  since it is unreachable by keyboard and touch.
+- **2.2.1 Timing Adjustable** — the rate-lock and deposit countdowns can be
+  extended or restarted, so an expired timer never strands the user.
+- **1.4.3 / 1.4.11 Contrast** — token values were picked by measuring ratios,
+  not by eye. The light-theme gold was darkened to `#8a6413` to clear 4.5:1 as
+  body text, gradient headings use dark-only stops in light mode, form controls
+  use a dedicated `--control-border` that meets 3:1, and success/danger colours
+  differ per theme.
+- **2.4.1 Bypass Blocks** — a "Skip to main content" link, visible on focus.
+- **2.4.7 Focus Visible** — every interactive element has a gold focus ring.
+- **2.4.2 Page Titled** — per-route titles via the metadata template.
+- **3.3.1 Error Identification** — form errors are announced with `role="alert"`
+  and wired to their field via `aria-invalid` / `aria-describedby`.
+- **1.4.1 Use of Color** — 24h movement, statuses and steps all carry an icon or
+  text label alongside colour.
+- **4.1.2 Name, Role, Value** — the operation switcher is a real `tablist`, the
+  payment methods a `radiogroup`, and the active nav item carries `aria-current`.
+- `prefers-reduced-motion` disables the ticker scroll, entrance animations and
+  hover lifts.
+
+### Breadcrumbs
+
+`src/components/breadcrumbs.tsx` renders both a visible
+`<nav aria-label="Breadcrumb">` trail (current page marked `aria-current="page"`
+and not linked) and a schema.org **`BreadcrumbList` in JSON-LD**, the format
+Google recommends for breadcrumb rich results. Absolute URLs come from
+`NEXT_PUBLIC_SITE_URL` when set.
+
 ## Error and loading states
 
 - `src/app/not-found.tsx` — branded 404 with routes back into the app.

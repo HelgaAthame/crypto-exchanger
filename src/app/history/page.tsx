@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, Clock, History as HistoryIcon } from "lucide-react";
 import { useAllRequests } from "@/lib/use-requests";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import type { ExchangeRequest } from "@/types/exchange-request";
 
 const STATUS_STYLE: Record<ExchangeRequest["status"], string> = {
@@ -22,6 +23,8 @@ export default function HistoryPage() {
 
   return (
     <div className="mx-auto w-full max-w-xl px-5 pb-20 pt-12">
+      <Breadcrumbs items={[{ label: "Calculator", href: "/" }, { label: "History" }]} />
+
       <div className="mb-7">
         <h1 className="text-3xl font-semibold tracking-tight">Request history</h1>
         <p className="mt-2 text-sm text-muted">

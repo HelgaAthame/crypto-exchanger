@@ -13,7 +13,7 @@ const DEMO_CARD = "4242 4242 4242 4242";
 const DEMO_IBAN = "DE00 0000 0000 0000 0000 00";
 
 const FIELD =
-  "w-full rounded-xl border border-border bg-background px-4 py-3 text-sm transition-colors hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25";
+  "w-full rounded-xl border border-control-border bg-background px-4 py-3 text-sm transition-colors hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25";
 
 export default function DetailsPage() {
   const router = useRouter();
@@ -170,7 +170,11 @@ export default function DetailsPage() {
               </label>
             )}
 
-            {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+            {error && (
+              <p id="details-error" role="alert" className="mt-3 text-sm text-danger">
+                {error}
+              </p>
+            )}
 
             <button
               type="button"

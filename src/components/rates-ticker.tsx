@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { Pause, Play, TrendingDown, TrendingUp } from "lucide-react";
 import { CurrencyIcon } from "@/components/currency-icon";
 
 type TickerItem = {
@@ -22,6 +22,9 @@ function formatPrice(value: number): string {
 
 export function RatesTicker() {
   const [items, setItems] = useState<TickerItem[]>([]);
+  // WCAG 2.2.2: auto-scrolling content that runs longer than five seconds
+  // needs a control that does not depend on hover.
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,8 +49,21 @@ export function RatesTicker() {
   if (items.length === 0) return null;
 
   return (
-    <div className="ticker relative border-b border-border/60 bg-linear-to-r from-transparent via-accent/6 to-transparent py-2.5">
-      <div className="ticker-track">
+    <div className="relative flex items-center border-b border-border/60 bg-linear-to-r from-transparent via-accent/6 to-transparent py-2.5">
+      <button
+        type="button"
+        onClick={() => setPaused((p) => !p)}
+        aria-pressed={paused}
+        className="ml-2 grid size-7 shrink-0 place-items-center rounded-full border border-border/70 bg-card/70 text-muted transition-colors hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+      >
+        {paused ? <Play className="size-3" aria-hidden /> : <Pause className="size-3" aria-hidden />}
+        <span className="sr-only">
+          {paused ? "Resume the rates ticker" : "Pause the rates ticker"}
+        </span>
+      </button>
+
+      <div className="ticker flex-1">
+        <div className="ticker-track" data-paused={paused || undefined}>
         {[0, 1].map((copy) => (
           <ul
             key={copy}
@@ -71,7 +87,7 @@ export function RatesTicker() {
                     {item.change24h !== null && (
                       <span
                         className={`flex items-center gap-0.5 text-xs font-medium tabular-nums ${
-                          up ? "text-emerald-500" : "text-red-500"
+                          up ? "text-success" : "text-danger"
                         }`}
                       >
                         {up ? (
@@ -88,6 +104,7 @@ export function RatesTicker() {
             })}
           </ul>
         ))}
+        </div>
       </div>
     </div>
   );

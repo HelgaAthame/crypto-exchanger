@@ -104,24 +104,33 @@ export default function ConfirmPage() {
             </dl>
           </div>
 
-          <p
-            className={`mt-4 flex items-center justify-center gap-1.5 text-sm ${
-              expired ? "text-red-500" : "text-muted"
-            }`}
-            aria-live="polite"
-          >
-            <Timer className="size-3.5" aria-hidden />
-            {expired ? (
-              "Rate lock expired — go back to the calculator for a fresh quote."
-            ) : (
-              <>
-                Rate locked for{" "}
-                <span className="font-medium tabular-nums text-foreground">
-                  {mm}:{ss}
-                </span>
-              </>
-            )}
-          </p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm">
+            <p
+              className={`flex items-center gap-1.5 ${expired ? "text-danger" : "text-muted"}`}
+              aria-live="polite"
+            >
+              <Timer className="size-3.5" aria-hidden />
+              {expired ? (
+                "Rate lock expired."
+              ) : (
+                <>
+                  Rate locked for{" "}
+                  <span className="font-medium tabular-nums text-foreground">
+                    {mm}:{ss}
+                  </span>
+                </>
+              )}
+            </p>
+
+            {/* WCAG 2.2.1: the countdown must never be able to strand the user. */}
+            <button
+              type="button"
+              onClick={() => setSecondsLeft(RATE_LOCK_SECONDS)}
+              className="rounded-full border border-border px-3 py-1 text-xs font-medium transition-colors hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+            >
+              {expired ? "Restart rate lock" : "Extend"}
+            </button>
+          </div>
 
           <button
             type="button"

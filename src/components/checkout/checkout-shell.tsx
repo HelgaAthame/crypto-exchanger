@@ -7,6 +7,7 @@ import { ArrowLeft, Loader2, ShieldAlert, XCircle } from "lucide-react";
 import { resolveStepAccess } from "@/lib/checkout-flow";
 import { useRequest } from "@/lib/use-requests";
 import { StepProgress } from "@/components/checkout/step-progress";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import type { ExchangeRequest, ExchangeStep } from "@/types/exchange-request";
 
 const STEP_PATH: Record<ExchangeStep, string> = {
@@ -77,6 +78,15 @@ export function CheckoutShell({ step, title, subtitle, children }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-xl px-5 pb-20 pt-10">
+      <Breadcrumbs
+        items={[
+          { label: "Calculator", href: "/" },
+          { label: "History", href: "/history" },
+          { label: "Request", href: `/exchange/${request.id}` },
+          { label: title },
+        ]}
+      />
+
       <StepProgress
         requestId={request.id}
         current={step}

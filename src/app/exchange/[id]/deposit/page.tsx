@@ -68,7 +68,7 @@ export default function DepositPage() {
                   Deposit address
                 </span>
                 <div className="mt-1.5 flex items-center gap-2">
-                  <code className="flex-1 break-all rounded-xl border border-border bg-background px-3 py-2.5 font-mono text-xs">
+                  <code className="flex-1 break-all rounded-xl border border-control-border bg-background px-3 py-2.5 font-mono text-xs">
                     {address}
                   </code>
                   <button
@@ -82,7 +82,7 @@ export default function DepositPage() {
                     className="grid size-10 shrink-0 place-items-center rounded-xl border border-border text-muted transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 active:translate-y-0"
                   >
                     {copied ? (
-                      <Check className="size-4 text-emerald-500" aria-hidden />
+                      <Check className="size-4 text-success" aria-hidden />
                     ) : (
                       <Copy className="size-4" aria-hidden />
                     )}
@@ -90,19 +90,29 @@ export default function DepositPage() {
                 </div>
               </div>
 
-              <p className="flex items-center gap-1.5 text-sm text-muted" aria-live="polite">
-                <Timer className="size-3.5" aria-hidden />
-                {secondsLeft === 0 ? (
-                  "Deposit window expired"
-                ) : (
-                  <>
-                    Window closes in{" "}
-                    <span className="font-medium tabular-nums text-foreground">
-                      {mm}:{ss}
-                    </span>
-                  </>
-                )}
-              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <p className="flex items-center gap-1.5 text-sm text-muted" aria-live="polite">
+                  <Timer className="size-3.5" aria-hidden />
+                  {secondsLeft === 0 ? (
+                    "Deposit window expired"
+                  ) : (
+                    <>
+                      Window closes in{" "}
+                      <span className="font-medium tabular-nums text-foreground">
+                        {mm}:{ss}
+                      </span>
+                    </>
+                  )}
+                </p>
+                {/* WCAG 2.2.1: the window can always be reopened. */}
+                <button
+                  type="button"
+                  onClick={() => setSecondsLeft(WINDOW_SECONDS)}
+                  className="rounded-full border border-border px-3 py-1 text-xs font-medium transition-colors hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                >
+                  {secondsLeft === 0 ? "Reopen window" : "Extend"}
+                </button>
+              </div>
             </div>
 
             <button

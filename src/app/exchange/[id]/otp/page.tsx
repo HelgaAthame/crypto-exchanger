@@ -39,10 +39,16 @@ export default function OtpPage() {
               }}
               placeholder="••••••"
               aria-label="Verification code"
-              className="mt-5 w-44 rounded-xl border border-border bg-background px-4 py-3 text-center text-2xl tracking-[0.35em] tabular-nums transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? "otp-error" : undefined}
+              className="mt-5 w-44 rounded-xl border border-control-border bg-background px-4 py-3 text-center text-2xl tracking-[0.35em] tabular-nums transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
             />
 
-            {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+            {error && (
+              <p id="otp-error" role="alert" className="mt-3 text-sm text-danger">
+                {error}
+              </p>
+            )}
           </div>
 
           <button

@@ -5,11 +5,21 @@
   --foreground: #17150f;
   --muted: #6b6659;
   --border: #e6e1d6;
+  /* Borders of actual controls need 3:1 against their background (WCAG 1.4.11),
+     which the decorative --border tone does not meet. */
+  --control-border: #8f8674;
   --card: #ffffff;
-  --accent: #a17a1f;
+  /* Darkened from the brand gold so it clears 4.5:1 as body text on light. */
+  --accent: #8a6413;
   --gold-dark: #7a5a17;
   --gold-mid: #c9992f;
   --gold-light: #f4e2a1;
+  /* Gradient text has to stay legible, so light mode uses only dark stops. */
+  --gold-text-1: #6f5210;
+  --gold-text-2: #8a6413;
+  --gold-text-3: #7a5a17;
+  --success: #047857;
+  --danger: #b91c1c;
   --glow: rgba(201, 153, 47, 0.18);
   --shell: rgba(255, 255, 255, 0.72);
   --card-shadow: 0 10px 30px -18px rgba(23, 21, 15, 0.25);
@@ -20,11 +30,17 @@
   --foreground: #f2efe6;
   --muted: #9c968a;
   --border: #35301c;
+  --control-border: #756e58;
   --card: #1a1a1f;
   --accent: #d4af37;
   --gold-dark: #7a5a17;
   --gold-mid: #c9992f;
   --gold-light: #f4e2a1;
+  --gold-text-1: #f4e2a1;
+  --gold-text-2: #e0b84a;
+  --gold-text-3: #f9edc0;
+  --success: #34d399;
+  --danger: #f87171;
   --glow: rgba(212, 175, 55, 0.14);
   --shell: rgba(19, 19, 22, 0.72);
   /* Dark mode gets a gold rim-light instead of a drop shadow — a shadow is
@@ -44,6 +60,9 @@
   --color-gold-dark: var(--gold-dark);
   --color-gold-mid: var(--gold-mid);
   --color-gold-light: var(--gold-light);
+  --color-control-border: var(--control-border);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
   --color-shell: var(--shell);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -65,10 +84,9 @@ body {
 .gold-text {
   background: linear-gradient(
     135deg,
-    var(--gold-dark) 0%,
-    var(--gold-light) 40%,
-    var(--gold-mid) 70%,
-    var(--gold-dark) 100%
+    var(--gold-text-1) 0%,
+    var(--gold-text-2) 45%,
+    var(--gold-text-3) 100%
   );
   background-clip: text;
   -webkit-background-clip: text;
@@ -93,7 +111,8 @@ body {
   animation: ticker-scroll 45s linear infinite;
 }
 
-.ticker:hover .ticker-track {
+.ticker:hover .ticker-track,
+.ticker-track[data-paused] {
   animation-play-state: paused;
 }
 

@@ -151,7 +151,7 @@ export function ExchangeCalculator() {
                 min={0}
                 value={giveAmount}
                 onChange={(e) => setGiveAmount(e.target.value)}
-                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-2xl font-semibold tabular-nums transition-colors hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
+                className="w-full rounded-xl border border-control-border bg-background px-4 py-3 text-2xl font-semibold tabular-nums transition-colors hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
               />
             </label>
           </div>
@@ -197,7 +197,7 @@ export function ExchangeCalculator() {
 
         <div className="mt-4 rounded-2xl border border-border/70 p-4 text-sm">
           {rateError ? (
-            <p className="flex items-center gap-2 text-red-500">
+            <p className="flex items-center gap-2 text-danger">
               <TriangleAlert className="size-4 shrink-0" aria-hidden />
               {rateError}
             </p>
@@ -257,12 +257,18 @@ export function ExchangeCalculator() {
             value={contact}
             onChange={(e) => setContact(e.target.value)}
             placeholder="you@example.com"
-            className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm transition-colors hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
+            aria-invalid={submitError ? true : undefined}
+            aria-describedby={submitError ? "calculator-error" : undefined}
+            className="w-full rounded-xl border border-control-border bg-background px-4 py-3 text-sm transition-colors hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
           />
         </label>
 
         {submitError && (
-          <p className="mt-3 flex items-center gap-2 text-sm text-red-500">
+          <p
+            id="calculator-error"
+            role="alert"
+            className="mt-3 flex items-center gap-2 text-sm text-danger"
+          >
             <TriangleAlert className="size-4 shrink-0" aria-hidden />
             {submitError}
           </p>

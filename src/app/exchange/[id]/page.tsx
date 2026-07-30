@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Loader2, XCircle } from "lucide-react";
 import { setStage } from "@/lib/history-store";
 import { useRequest } from "@/lib/use-requests";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import type { ExchangeStage } from "@/types/exchange-request";
 
 const STAGES: { id: ExchangeStage; label: string; body: string }[] = [
@@ -108,6 +109,14 @@ export default function ExchangeStatusPage() {
 
   return (
     <div className="mx-auto w-full max-w-xl px-5 pb-20 pt-10">
+      <Breadcrumbs
+        items={[
+          { label: "Calculator", href: "/" },
+          { label: "History", href: "/history" },
+          { label: "Request status" },
+        ]}
+      />
+
       <Link
         href="/history"
         className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-foreground"

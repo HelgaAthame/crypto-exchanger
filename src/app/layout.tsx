@@ -17,7 +17,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Crypto Exchanger — demo exchange calculator",
+  title: {
+    default: "Crypto Exchanger — demo exchange calculator",
+    template: "%s · Crypto Exchanger",
+  },
   description:
     "A portfolio demo project: live fiat/crypto exchange rate calculator. No real funds are transferred.",
 };
@@ -35,10 +38,18 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider>
+          <a
+            href="#main"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-xl focus:bg-card focus:px-4 focus:py-2.5 focus:text-sm focus:font-medium focus:ring-2 focus:ring-accent"
+          >
+            Skip to main content
+          </a>
           <DemoBanner />
           <NavBar />
           <RatesTicker />
-          <main className="flex-1">{children}</main>
+          <main id="main" tabIndex={-1} className="flex-1 scroll-mt-24">
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>
