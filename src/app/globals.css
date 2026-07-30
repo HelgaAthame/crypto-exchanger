@@ -55,6 +55,9 @@
 }
 
 @theme inline {
+  /* Small-phone breakpoint: below this the four operation tabs stop fitting
+     on one row. */
+  --breakpoint-xs: 26rem;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);

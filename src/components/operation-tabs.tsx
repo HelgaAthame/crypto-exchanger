@@ -16,12 +16,13 @@ export function OperationTabs({ value, onChange }: Props) {
       <div
         role="tablist"
         aria-label="Operation"
-        className="relative grid grid-cols-4 gap-1 rounded-2xl border border-border bg-background/60 p-1"
+        className="relative grid grid-cols-2 gap-1 rounded-2xl border border-border bg-background/60 p-1 xs:grid-cols-4"
       >
-        {/* Sliding indicator sits behind the labels. */}
+        {/* Sliding indicator sits behind the labels. Below xs the tabs wrap to a
+            2×2 grid, where a single sliding track cannot follow them. */}
         <span
           aria-hidden
-          className="gold-surface pointer-events-none absolute inset-y-1 left-1 rounded-xl shadow-sm transition-transform duration-300 ease-out"
+          className="gold-surface pointer-events-none absolute inset-y-1 left-1 hidden rounded-xl shadow-sm transition-transform duration-300 ease-out xs:block"
           style={{
             width: `calc((100% - 0.5rem) / ${OPERATION_MODES.length} - 0.19rem)`,
             transform: `translateX(calc(${activeIndex} * (100% + 0.25rem)))`,
@@ -38,7 +39,9 @@ export function OperationTabs({ value, onChange }: Props) {
               aria-selected={isActive}
               onClick={() => onChange(mode.id)}
               className={`relative z-10 rounded-xl py-2 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${
-                isActive ? "text-black" : "text-muted hover:text-foreground"
+                isActive
+                  ? "text-black max-xs:gold-surface"
+                  : "text-muted hover:text-foreground"
               }`}
             >
               {mode.label}

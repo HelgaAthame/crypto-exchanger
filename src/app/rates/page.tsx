@@ -70,8 +70,8 @@ export default function RatesPage() {
           Loading rates…
         </p>
       ) : (
-        <div className="surface-card overflow-hidden rounded-2xl">
-          <table className="w-full text-left text-sm">
+        <div className="surface-card overflow-x-auto rounded-2xl">
+          <table className="w-full min-w-md text-left text-sm">
             <caption className="sr-only">
               Supported currencies with their US dollar price and 24-hour change
             </caption>
@@ -96,9 +96,9 @@ export default function RatesPage() {
                     <th scope="row" className="px-4 py-3 font-normal">
                       <span className="flex items-center gap-2.5">
                         <CurrencyIcon code={row.code} />
-                        <span>
+                        <span className="flex flex-col sm:flex-row sm:gap-2">
                           <span className="font-medium">{row.code}</span>
-                          <span className="ml-2 text-muted">{row.name}</span>
+                          <span className="text-xs text-muted sm:text-sm">{row.name}</span>
                         </span>
                       </span>
                     </th>

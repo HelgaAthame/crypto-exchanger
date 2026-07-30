@@ -232,6 +232,15 @@ flashing a skeleton, and a table view exposes every value without hovering. Line
 colours were checked with the dataviz palette validator against each theme's
 surface, and dark mode uses its own step rather than a flipped light one.
 
+### Custom select
+
+Native `<select>` is drawn by the OS and cannot be styled to match the rest of
+the form, so `src/components/ui/select-menu.tsx` implements the listbox pattern
+instead: the trigger reuses the input styling and shows the currency icon, and
+the popup is a styled card. It keeps the native keyboard contract — arrows,
+Home/End, Enter/Space, Escape, and character type-ahead — with focus staying on
+the trigger and the active option announced via `aria-activedescendant`.
+
 ### Breadcrumbs
 
 `src/components/breadcrumbs.tsx` renders both a visible
