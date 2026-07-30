@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Pause, Play, TrendingDown, TrendingUp } from "lucide-react";
 import { CurrencyIcon } from "@/components/currency-icon";
 
@@ -73,9 +74,19 @@ export function RatesTicker() {
           >
             {items.map((item) => {
               const up = item.change24h !== null && item.change24h >= 0;
+              const change =
+                item.change24h === null
+                  ? ""
+                  : `, ${up ? "up" : "down"} ${Math.abs(item.change24h).toFixed(2)} percent`;
               return (
                 <li key={item.code}>
-                  <span className="ticker-pill group flex items-center gap-2 whitespace-nowrap rounded-full border border-border/70 bg-card/70 px-3 py-1.5 backdrop-blur-sm">
+                  <Link
+                    href={`/rates/${item.code}`}
+                    // The mirrored copy exists only to close the loop visually.
+                    tabIndex={copy === 1 ? -1 : undefined}
+                    aria-label={`${item.name}, $${formatPrice(item.usdPrice)}${change} — view details`}
+                    className="ticker-pill group flex items-center gap-2 whitespace-nowrap rounded-full border border-border/70 bg-card/70 px-3 py-1.5 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                  >
                     <CurrencyIcon
                       code={item.code}
                       className="transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[8deg]"
@@ -98,7 +109,7 @@ export function RatesTicker() {
                         {Math.abs(item.change24h).toFixed(2)}%
                       </span>
                     )}
-                  </span>
+                  </Link>
                 </li>
               );
             })}

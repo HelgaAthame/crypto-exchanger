@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowUpDown, Loader2, ShieldCheck, TriangleAlert } from "lucide-react";
 import { CurrencySelect } from "@/components/currency-select";
 import { OperationTabs } from "@/components/operation-tabs";
@@ -9,8 +9,14 @@ import { RateChart } from "@/components/rate-chart";
 import { computeExchangeAmount, validateExchangeRequest } from "@/lib/exchange-calc";
 import { DEFAULT_FEE_PERCENT, MAX_AMOUNT_USD, MIN_AMOUNT_USD } from "@/lib/limits";
 import { createRequest } from "@/lib/history-store";
-import { CRYPTO_CURRENCIES, FIAT_CURRENCIES, isSupportedCurrency } from "@/lib/currencies";
 import {
+  CRYPTO_CURRENCIES,
+  FIAT_CURRENCIES,
+  getCurrency,
+  isSupportedCurrency,
+} from "@/lib/currencies";
+import {
+  OPERATION_MODES,
   defaultPairForMode,
   invertMode,
   kindsForMode,
@@ -29,9 +35,29 @@ function formatAmount(value: number): string {
 
 export function ExchangeCalculator() {
   const router = useRouter();
-  const [mode, setMode] = useState<OperationMode>("buy");
-  const [giveCurrency, setGiveCurrency] = useState("USD");
-  const [receiveCurrency, setReceiveCurrency] = useState("BTC");
+  const searchParams = useSearchParams();
+
+  // A currency page can deep-link into a prefilled pair, e.g. /?mode=buy&receive=BTC.
+  const [mode, setMode] = useState<OperationMode>(() => {
+    const requested = searchParams.get("mode");
+    return OPERATION_MODES.some((m) => m.id === requested)
+      ? (requested as OperationMode)
+      : "buy";
+  });
+  const initialPair = (() => {
+    const pair = defaultPairForMode(mode);
+    const give = searchParams.get("give")?.toUpperCase();
+    const receive = searchParams.get("receive")?.toUpperCase();
+    const kinds = kindsForMode(mode);
+    return {
+      give: give && getCurrency(give)?.kind === kinds.give ? give : pair.give,
+      receive:
+        receive && getCurrency(receive)?.kind === kinds.receive ? receive : pair.receive,
+    };
+  })();
+
+  const [giveCurrency, setGiveCurrency] = useState(initialPair.give);
+  const [receiveCurrency, setReceiveCurrency] = useState(initialPair.receive);
   const [giveAmount, setGiveAmount] = useState("100");
   const [rate, setRate] = useState<number | null>(null);
   const [rateUpdatedAt, setRateUpdatedAt] = useState<string | null>(null);

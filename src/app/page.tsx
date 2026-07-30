@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import { Gauge, Receipt, UserRoundCheck, Zap } from "lucide-react";
 import { ExchangeCalculator } from "@/components/exchange-calculator";
@@ -80,7 +81,10 @@ export default function Home() {
         </section>
 
         <div className="rise-in order-1 lg:order-2">
-          <ExchangeCalculator />
+          {/* The calculator reads deep-link params, so it needs a Suspense boundary. */}
+          <Suspense fallback={<div className="surface-card h-96 rounded-3xl" />}>
+            <ExchangeCalculator />
+          </Suspense>
         </div>
       </div>
     </div>

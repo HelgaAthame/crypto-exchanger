@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CurrencyIcon } from "@/components/currency-icon";
@@ -94,13 +95,16 @@ export default function RatesPage() {
                 return (
                   <tr key={row.code} className="border-b border-border/50 last:border-0">
                     <th scope="row" className="px-4 py-3 font-normal">
-                      <span className="flex items-center gap-2.5">
+                      <Link
+                        href={`/rates/${row.code}`}
+                        className="flex items-center gap-2.5 rounded transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                      >
                         <CurrencyIcon code={row.code} />
                         <span className="flex flex-col sm:flex-row sm:gap-2">
                           <span className="font-medium">{row.code}</span>
                           <span className="text-xs text-muted sm:text-sm">{row.name}</span>
                         </span>
-                      </span>
+                      </Link>
                     </th>
                     <td className="px-4 py-3 text-right tabular-nums">
                       ${formatPrice(row.usdPrice)}

@@ -33,6 +33,28 @@ export function buildCrossSeries(
   return points.sort((x, y) => x.date.localeCompare(y.date));
 }
 
+export type SeriesStats = {
+  min: number;
+  max: number;
+  first: number;
+  last: number;
+  changePercent: number | null;
+};
+
+/** Period summary for the detail page, derived from an already-loaded series. */
+export function seriesStats(points: RatePoint[]): SeriesStats | null {
+  if (points.length === 0) return null;
+
+  const rates = points.map((p) => p.rate);
+  return {
+    min: Math.min(...rates),
+    max: Math.max(...rates),
+    first: rates[0],
+    last: rates[rates.length - 1],
+    changePercent: seriesChangePercent(points),
+  };
+}
+
 /** Percentage change across the series, used for the headline delta. */
 export function seriesChangePercent(points: RatePoint[]): number | null {
   if (points.length < 2) return null;

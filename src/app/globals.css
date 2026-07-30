@@ -123,7 +123,10 @@ body {
   animation: ticker-scroll 45s linear infinite;
 }
 
+/* Focus-within matters as much as hover: without it a keyboard user can never
+   reach a pill, because it scrolls out from under them. */
 .ticker:hover .ticker-track,
+.ticker:focus-within .ticker-track,
 .ticker-track[data-paused] {
   animation-play-state: paused;
 }

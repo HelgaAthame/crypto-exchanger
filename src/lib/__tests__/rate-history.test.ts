@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCrossSeries, seriesChangePercent } from "../rate-history";
+import { buildCrossSeries, seriesChangePercent, seriesStats } from "../rate-history";
 
 const BTC = { "2026-01-01": 40000, "2026-01-02": 50000 };
 const EUR = { "2026-01-01": 1.1, "2026-01-02": 1.2 };
@@ -49,6 +49,38 @@ describe("buildCrossSeries", () => {
     const unordered = { "2026-01-03": 300, "2026-01-01": 100 };
     const dates = buildCrossSeries("BTC", "USD", unordered, {}).map((p) => p.date);
     expect(dates).toEqual(["2026-01-01", "2026-01-03"]);
+  });
+});
+
+describe("seriesStats", () => {
+  const points = [
+    { date: "2026-01-01", rate: 100 },
+    { date: "2026-01-02", rate: 60 },
+    { date: "2026-01-03", rate: 130 },
+  ];
+
+  it("summarises the period", () => {
+    expect(seriesStats(points)).toEqual({
+      min: 60,
+      max: 130,
+      first: 100,
+      last: 130,
+      changePercent: 30,
+    });
+  });
+
+  it("handles a single point", () => {
+    expect(seriesStats([{ date: "a", rate: 5 }])).toEqual({
+      min: 5,
+      max: 5,
+      first: 5,
+      last: 5,
+      changePercent: null,
+    });
+  });
+
+  it("returns null for an empty series", () => {
+    expect(seriesStats([])).toBeNull();
   });
 });
 
