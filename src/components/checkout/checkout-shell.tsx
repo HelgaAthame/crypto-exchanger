@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { PageContainer } from "@/components/layout/page-container";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Loader2, ShieldAlert, XCircle } from "lucide-react";
@@ -48,7 +49,7 @@ export function CheckoutShell({ step, title, subtitle, children }: Props) {
 
   if (request === undefined || redirectTo) {
     return (
-      <div className="mx-auto flex max-w-xl items-center gap-2 px-5 py-16 text-sm text-muted">
+      <div className="mx-auto flex max-w-2xl items-center gap-2 px-4 py-16 sm:px-5 text-sm text-muted">
         <Loader2 className="size-4 animate-spin" aria-hidden />
         Loading request…
       </div>
@@ -57,7 +58,7 @@ export function CheckoutShell({ step, title, subtitle, children }: Props) {
 
   if (request === null) {
     return (
-      <div className="mx-auto w-full max-w-xl px-5 pt-16">
+      <PageContainer className="pt-16">
         <div className="surface-card rounded-3xl p-10 text-center">
           <XCircle className="mx-auto size-8 text-muted" aria-hidden />
           <p className="mt-4 font-medium">Request not found</p>
@@ -72,12 +73,12 @@ export function CheckoutShell({ step, title, subtitle, children }: Props) {
             Back to calculator
           </Link>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-xl px-5 pb-20 pt-10">
+    <PageContainer className="pb-20 pt-10">
       <Breadcrumbs
         items={[
           { label: "Calculator", href: "/" },
@@ -106,6 +107,6 @@ export function CheckoutShell({ step, title, subtitle, children }: Props) {
           nothing you enter leaves this browser.
         </p>
       </div>
-    </div>
+    </PageContainer>
   );
 }

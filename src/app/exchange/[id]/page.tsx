@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { PageContainer } from "@/components/layout/page-container";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Loader2, XCircle } from "lucide-react";
@@ -57,7 +58,7 @@ export default function ExchangeStatusPage() {
 
   if (request === undefined) {
     return (
-      <div className="mx-auto flex max-w-xl items-center gap-2 px-5 py-16 text-sm text-muted">
+      <div className="mx-auto flex max-w-2xl items-center gap-2 px-4 py-16 sm:px-5 text-sm text-muted">
         <Loader2 className="size-4 animate-spin" aria-hidden />
         Loading request…
       </div>
@@ -66,7 +67,7 @@ export default function ExchangeStatusPage() {
 
   if (request === null) {
     return (
-      <div className="mx-auto w-full max-w-xl px-5 pt-16">
+      <PageContainer className="pt-16">
         <div className="surface-card rounded-3xl p-10 text-center">
           <XCircle className="mx-auto size-8 text-muted" aria-hidden />
           <p className="mt-4 font-medium">Request not found</p>
@@ -81,14 +82,14 @@ export default function ExchangeStatusPage() {
             Back to calculator
           </Link>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   // Reached the status URL without paying — send them back into the flow.
   if (request.step !== "status") {
     return (
-      <div className="mx-auto w-full max-w-xl px-5 pt-16">
+      <PageContainer className="pt-16">
         <div className="surface-card rounded-3xl p-10 text-center">
           <p className="font-medium">This request isn&apos;t paid yet</p>
           <p className="mt-1.5 text-sm text-muted">Finish the checkout to track its status.</p>
@@ -100,7 +101,7 @@ export default function ExchangeStatusPage() {
             <ArrowRight className="size-3.5" aria-hidden />
           </Link>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -108,7 +109,7 @@ export default function ExchangeStatusPage() {
   const isDone = request.stage === "completed";
 
   return (
-    <div className="mx-auto w-full max-w-xl px-5 pb-20 pt-10">
+    <PageContainer className="pb-20 pt-10">
       <Breadcrumbs
         items={[
           { label: "Calculator", href: "/" },
@@ -202,7 +203,7 @@ export default function ExchangeStatusPage() {
           </Link>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }
 

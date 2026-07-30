@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { PageContainer } from "@/components/layout/page-container";
 import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Loader2, TrendingDown, TrendingUp } from "lucide-react";
@@ -56,7 +57,7 @@ export default function CurrencyDetailPage() {
   const isCrypto = currency.kind === "crypto";
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-5 pb-20 pt-10">
+    <PageContainer className="pb-20 pt-10">
       <Breadcrumbs
         items={[
           { label: "Calculator", href: "/" },
@@ -176,6 +177,6 @@ export default function CurrencyDetailPage() {
           </div>
         )}
       </section>
-    </div>
+    </PageContainer>
   );
 }

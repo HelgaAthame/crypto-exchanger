@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PageContainer } from "@/components/layout/page-container";
 import { ArrowLeft, RotateCcw, TriangleAlert } from "lucide-react";
 
 export default function Error({
@@ -11,7 +12,7 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <div className="mx-auto w-full max-w-xl px-5 pb-20 pt-16 text-center">
+    <PageContainer className="pb-20 pt-16 text-center">
       <div className="surface-card rise-in relative overflow-hidden rounded-3xl p-10">
         <div
           aria-hidden
@@ -54,6 +55,6 @@ export default function Error({
           </Link>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

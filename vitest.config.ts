@@ -11,7 +11,15 @@ export default defineConfig({
     environment: "node",
     coverage: {
       provider: "v8",
-      include: ["src/lib/exchange-calc.ts", "src/lib/currencies.ts"],
+      // Every pure domain module. Browser- and network-bound code
+      // (history-store, rates/*, use-requests) is deliberately excluded.
+      include: [
+        "src/lib/exchange-calc.ts",
+        "src/lib/currencies.ts",
+        "src/lib/checkout-flow.ts",
+        "src/lib/operations.ts",
+        "src/lib/rate-history.ts",
+      ],
       thresholds: {
         lines: 100,
         functions: 100,

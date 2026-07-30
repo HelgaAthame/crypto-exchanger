@@ -33,7 +33,7 @@ export default function Home() {
         className="pointer-events-none absolute -right-32 top-1/3 size-[26rem] rounded-full bg-accent/10 blur-3xl"
       />
 
-      <div className="relative mx-auto grid w-full max-w-6xl items-center gap-12 px-5 pb-20 pt-12 lg:grid-cols-[1fr_minmax(0,26rem)] lg:gap-16 lg:pt-20">
+      <div className="relative mx-auto grid w-full max-w-5xl items-center gap-12 px-4 pb-20 pt-12 sm:px-5 lg:grid-cols-[1fr_minmax(0,26rem)] lg:gap-16 lg:pt-20">
         <section className="rise-in order-2 lg:order-1">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/25 bg-accent/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-accent">
             <Zap className="size-3" aria-hidden />

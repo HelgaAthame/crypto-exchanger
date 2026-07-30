@@ -58,7 +58,10 @@ export function ExchangeCalculator() {
 
   const [giveCurrency, setGiveCurrency] = useState(initialPair.give);
   const [receiveCurrency, setReceiveCurrency] = useState(initialPair.receive);
-  const [giveAmount, setGiveAmount] = useState("100");
+  // One amount plus the side it was typed on — the other side is derived, so
+  // the two inputs can never disagree.
+  const [amount, setAmount] = useState("100");
+  const [direction, setDirection] = useState<"give" | "receive">("give");
   const [rate, setRate] = useState<number | null>(null);
   const [rateUpdatedAt, setRateUpdatedAt] = useState<string | null>(null);
   const [rateLoading, setRateLoading] = useState(false);
@@ -91,16 +94,28 @@ export function ExchangeCalculator() {
     };
   }, [giveCurrency, receiveCurrency]);
 
-  const amountNumber = Number(giveAmount);
+  const amountNumber = Number(amount);
   const result =
     rate && amountNumber > 0
       ? computeExchangeAmount({
           amount: amountNumber,
-          direction: "give",
+          direction,
           rate,
           feePercent: DEFAULT_FEE_PERCENT,
         })
       : null;
+
+  /** The side being typed on shows the raw text; the other shows the result. */
+  function fieldValue(side: "give" | "receive"): string {
+    if (direction === side) return amount;
+    if (!result) return "";
+    return formatAmount(side === "give" ? result.giveAmount : result.receiveAmount);
+  }
+
+  function editAmount(side: "give" | "receive", next: string) {
+    setDirection(side);
+    setAmount(next);
+  }
 
   const kinds = kindsForMode(mode);
   const giveOptions = kinds.give === "fiat" ? FIAT_CURRENCIES : CRYPTO_CURRENCIES;
@@ -126,7 +141,8 @@ export function ExchangeCalculator() {
     if (!result || !rate) return;
 
     const validation = validateExchangeRequest({
-      amount: amountNumber,
+      // Limits apply to what the user pays, whichever side they typed on.
+      amount: result.giveAmount,
       giveCurrency,
       receiveCurrency,
       minAmount: MIN_AMOUNT_USD,
@@ -172,13 +188,14 @@ export function ExchangeCalculator() {
             />
             <label className="mt-3 flex flex-col gap-1.5">
               <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-                Amount
+                Amount {direction === "receive" && "(estimated)"}
               </span>
               <input
                 type="number"
                 min={0}
-                value={giveAmount}
-                onChange={(e) => setGiveAmount(e.target.value)}
+                inputMode="decimal"
+                value={fieldValue("give")}
+                onChange={(e) => editAmount("give", e.target.value)}
                 className="w-full rounded-xl border border-control-border bg-background px-4 py-3 text-2xl font-semibold tabular-nums transition-colors hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
               />
             </label>
@@ -203,23 +220,28 @@ export function ExchangeCalculator() {
               onChange={setReceiveCurrency}
               options={receiveOptions}
             />
-            <div className="mt-3">
+            <label className="mt-3 flex flex-col gap-1.5">
               <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-                Estimated amount
+                Amount {direction === "give" && "(estimated)"}
               </span>
-              <p className="mt-1.5 min-h-10 text-3xl font-semibold tabular-nums">
-                {rateLoading ? (
-                  <Loader2 className="size-6 animate-spin text-muted" aria-label="Loading" />
-                ) : result ? (
-                  <>
-                    <span className="gold-text">{formatAmount(result.receiveAmount)}</span>{" "}
-                    <span className="text-lg font-medium text-muted">{receiveCurrency}</span>
-                  </>
-                ) : (
-                  <span className="text-lg font-normal text-muted">—</span>
+              <span className="relative">
+                <input
+                  type="number"
+                  min={0}
+                  inputMode="decimal"
+                  value={fieldValue("receive")}
+                  onChange={(e) => editAmount("receive", e.target.value)}
+                  placeholder="0"
+                  className="w-full rounded-xl border border-control-border bg-background px-4 py-3 text-2xl font-semibold tabular-nums transition-colors hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
+                />
+                {rateLoading && (
+                  <Loader2
+                    className="absolute right-3.5 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted"
+                    aria-label="Loading rate"
+                  />
                 )}
-              </p>
-            </div>
+              </span>
+            </label>
           </div>
         </div>
 

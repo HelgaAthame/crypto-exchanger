@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PageContainer } from "@/components/layout/page-container";
 import { ArrowRight, Clock, History as HistoryIcon } from "lucide-react";
 import { useAllRequests } from "@/lib/use-requests";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -22,7 +23,7 @@ export default function HistoryPage() {
   const requests = useAllRequests() ?? [];
 
   return (
-    <div className="mx-auto w-full max-w-xl px-5 pb-20 pt-12">
+    <PageContainer className="pb-20 pt-12">
       <Breadcrumbs items={[{ label: "Calculator", href: "/" }, { label: "History" }]} />
 
       <div className="mb-7">
@@ -74,6 +75,6 @@ export default function HistoryPage() {
           ))}
         </ul>
       )}
-    </div>
+    </PageContainer>
   );
 }

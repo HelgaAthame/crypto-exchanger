@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { PageContainer } from "@/components/layout/page-container";
 import Link from "next/link";
 import { Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -52,7 +53,7 @@ export default function RatesPage() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-5 pb-20 pt-12">
+    <PageContainer className="pb-20 pt-12">
       <Breadcrumbs items={[{ label: "Calculator", href: "/" }, { label: "Live rates" }]} />
 
       <div className="mb-7">
@@ -140,6 +141,6 @@ export default function RatesPage() {
         Crypto prices come from CoinGecko, fiat from Frankfurter. Fiat pairs have no
         24-hour figure because the source publishes one rate per business day.
       </p>
-    </div>
+    </PageContainer>
   );
 }

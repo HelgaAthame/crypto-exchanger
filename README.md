@@ -35,6 +35,8 @@ demonstration of a converter/exchange UX and domain logic.
   **Swap** (crypto → crypto) and **Exchange** (fiat → fiat) — as a segmented
   control that narrows both currency lists to the pair the mode allows
 - Currency pair selector: fiat ↔ crypto, crypto ↔ crypto (4 fiat, 6 crypto)
+- Amount can be entered on either side — type what you pay or what you want to
+  receive, and the other side is derived
 - Live exchange rate, fetched from public APIs (CoinGecko for crypto, Frankfurter
   for fiat), cross-computed through a USD bridge
 - Transparent fee breakdown (exchanger fee shown separately from market rate)
@@ -188,8 +190,9 @@ npm run test:coverage     # vitest with coverage (100% required on src/lib)
 
 ## Testing approach
 
-The domain logic (rate/fee/cross-rate calculation, request validation and the
-checkout step machine) is covered at 100% with Vitest — this is the core of the app and the part worth
+Every pure domain module — rate/fee/cross-rate maths, request validation, the
+checkout step machine, operation-mode rules and rate history — is covered at 100%
+with Vitest (enforced by thresholds in `vitest.config.ts`) — this is the core of the app and the part worth
 guaranteeing correctness for. UI components and API routes are a thin layer on
 top and are intentionally left out of the coverage requirement.
 

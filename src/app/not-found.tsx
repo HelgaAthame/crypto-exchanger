@@ -1,10 +1,11 @@
 import Link from "next/link";
+import { PageContainer } from "@/components/layout/page-container";
 import Image from "next/image";
 import { ArrowLeft, History } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="mx-auto w-full max-w-xl px-5 pb-20 pt-16 text-center">
+    <PageContainer className="pb-20 pt-16 text-center">
       <div className="surface-card rise-in relative overflow-hidden rounded-3xl p-10">
         <div
           aria-hidden
@@ -47,6 +48,6 @@ export default function NotFound() {
           </Link>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }
