@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowUpDown, Loader2, ShieldCheck, TriangleAlert } from "lucide-react";
 import { CurrencySelect } from "@/components/currency-select";
 import { OperationTabs } from "@/components/operation-tabs";
+import { RateChart } from "@/components/rate-chart";
 import { computeExchangeAmount, validateExchangeRequest } from "@/lib/exchange-calc";
 import { DEFAULT_FEE_PERCENT, MAX_AMOUNT_USD, MIN_AMOUNT_USD } from "@/lib/limits";
 import { createRequest } from "@/lib/history-store";
@@ -129,7 +130,8 @@ export function ExchangeCalculator() {
   }
 
   return (
-    <div className="surface-card rounded-3xl p-5 sm:p-7">
+    <>
+      <div className="surface-card rounded-3xl p-5 sm:p-7">
         <div className="mb-5">
           <OperationTabs value={mode} onChange={changeMode} />
         </div>
@@ -286,7 +288,10 @@ export function ExchangeCalculator() {
         <p className="mt-3.5 flex items-center justify-center gap-1.5 text-xs text-muted">
           <ShieldCheck className="size-3.5 text-accent" aria-hidden />
         Simulated request — nothing is charged and no funds move
-      </p>
-    </div>
+        </p>
+      </div>
+
+      <RateChart from={giveCurrency} to={receiveCurrency} />
+    </>
   );
 }

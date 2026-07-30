@@ -20,6 +20,8 @@
   --gold-text-3: #7a5a17;
   --success: #047857;
   --danger: #b91c1c;
+  /* Chart mark colour, checked against this surface with the dataviz validator. */
+  --chart-line: #8a6413;
   --glow: rgba(201, 153, 47, 0.18);
   --shell: rgba(255, 255, 255, 0.72);
   --card-shadow: 0 10px 30px -18px rgba(23, 21, 15, 0.25);
@@ -41,6 +43,8 @@
   --gold-text-3: #f9edc0;
   --success: #34d399;
   --danger: #f87171;
+  /* Dark mode gets its own step, not a flip of the light one. */
+  --chart-line: #b08828;
   --glow: rgba(212, 175, 55, 0.14);
   --shell: rgba(19, 19, 22, 0.72);
   /* Dark mode gets a gold rim-light instead of a drop shadow — a shadow is

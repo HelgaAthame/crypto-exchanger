@@ -60,6 +60,60 @@ async function fetchFiatUsdRates(): Promise<UsdRates> {
   return result;
 }
 
+/** One USD price per calendar day, keyed by `YYYY-MM-DD`. */
+export type UsdSeries = Record<string, number>;
+
+function toDayKey(ms: number): string {
+  return new Date(ms).toISOString().slice(0, 10);
+}
+
+async function fetchCryptoUsdSeries(code: string, days: number): Promise<UsdSeries> {
+  const id = COINGECKO_IDS[code];
+  const url = `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=${days}&interval=daily`;
+  const res = await fetch(url, { next: { revalidate: 0 } });
+  if (!res.ok) {
+    throw new Error(`CoinGecko history request failed: ${res.status}`);
+  }
+  const data = (await res.json()) as { prices: [number, number][] };
+
+  const series: UsdSeries = {};
+  for (const [ms, price] of data.prices ?? []) {
+    // Later samples on the same day overwrite earlier ones, leaving the close.
+    series[toDayKey(ms)] = price;
+  }
+  return series;
+}
+
+async function fetchFiatUsdSeries(code: string, days: number): Promise<UsdSeries> {
+  if (code === "USD") return {};
+
+  const end = new Date();
+  const start = new Date(end.getTime() - days * 86_400_000);
+  const url = `https://api.frankfurter.dev/v1/${start.toISOString().slice(0, 10)}..${end
+    .toISOString()
+    .slice(0, 10)}?base=USD&symbols=${code}`;
+  const res = await fetch(url, { next: { revalidate: 0 } });
+  if (!res.ok) {
+    throw new Error(`Frankfurter history request failed: ${res.status}`);
+  }
+  const data = (await res.json()) as { rates: Record<string, Record<string, number>> };
+
+  const series: UsdSeries = {};
+  for (const [day, rates] of Object.entries(data.rates ?? {})) {
+    const perUsd = rates[code];
+    // Frankfurter gives "1 USD = X CODE"; the rest of the app works in USD per unit.
+    if (typeof perUsd === "number" && perUsd > 0) series[day] = 1 / perUsd;
+  }
+  return series;
+}
+
+export async function fetchUsdSeries(code: string, days: number): Promise<UsdSeries> {
+  if (code === "USD") return {};
+  return COINGECKO_IDS[code]
+    ? fetchCryptoUsdSeries(code, days)
+    : fetchFiatUsdSeries(code, days);
+}
+
 export async function fetchAllUsdRates(): Promise<{
   rates: UsdRates;
   changes24h: Record<string, number>;

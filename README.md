@@ -38,6 +38,9 @@ demonstration of a converter/exchange UX and domain logic.
 - Live exchange rate, fetched from public APIs (CoinGecko for crypto, Frankfurter
   for fiat), cross-computed through a USD bridge
 - Transparent fee breakdown (exchanger fee shown separately from market rate)
+- Rate history chart for the selected pair (7 / 30 / 90 days) with a crosshair
+  tooltip and a table view of the same data
+- `/rates` page listing every supported currency with its USD price and 24h change
 - Live rates ticker under the header: continuously scrolling pills with per-coin
   icons, USD price and 24h change, fed by the same real rate providers and
   refreshed every 60s
@@ -141,7 +144,12 @@ Postgres/Supabase).
 - `src/app/api/rates/route.ts` — Route Handler that exposes
   `GET /api/rates?from=X&to=Y` → `{ rate, updatedAt }`.
 - `src/app/api/ticker/route.ts` — `GET /api/ticker` → every supported currency
-  with its USD price and 24h change, for the header ticker.
+  with its USD price and 24h change, for the header ticker and `/rates`.
+- `src/app/api/history/route.ts` + `src/lib/rate-history.ts` —
+  `GET /api/history?from=X&to=Y&days=7|30|90`. `buildCrossSeries` is a pure
+  function (unit-tested) that divides two "USD per unit" series, treats USD as a
+  constant 1, and keeps only days present on both sides — fiat has no weekend
+  quotes, so an unmatched day has no defensible rate.
 - `src/components/rates-ticker.tsx`, `src/components/currency-icon.tsx` — the
   scrolling ticker and its inline (no external assets) coin icons.
 - `src/lib/operations.ts` — pure operation-mode rules (`kindsForMode`,
@@ -211,6 +219,18 @@ that needed deliberate work:
   payment methods a `radiogroup`, and the active nav item carries `aria-current`.
 - `prefers-reduced-motion` disables the ticker scroll, entrance animations and
   hover lifts.
+
+### The chart
+
+The rate history chart is hand-rolled SVG rather than a charting library, which
+keeps the bundle small and the marks exactly to spec: a single series (so no
+legend — the heading names it), a 2px line over a 10%-opacity wash, solid
+hairline gridlines one step off the surface, one direct label at the end point,
+and a crosshair that snaps to the nearest day. Range presets sit in one row above
+the plot, refetches hold the previous render at reduced opacity instead of
+flashing a skeleton, and a table view exposes every value without hovering. Line
+colours were checked with the dataviz palette validator against each theme's
+surface, and dark mode uses its own step rather than a flipped light one.
 
 ### Breadcrumbs
 
