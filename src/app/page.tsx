@@ -1,3 +1,5 @@
+"use client";
+
 import { Suspense } from "react";
 import Link from "next/link";
 import {
@@ -16,44 +18,23 @@ import { ExchangeCalculator } from "@/components/exchange-calculator";
 import { HeroBackdrop } from "@/components/home/hero-backdrop";
 import { PageContainer } from "@/components/layout/page-container";
 import { Reveal } from "@/components/layout/reveal";
+import { useT } from "@/lib/i18n/context";
 
 const HIGHLIGHTS = [
-  {
-    icon: Receipt,
-    title: "Transparent pricing",
-    body: "The market rate and our service fee are always shown as separate lines, never folded into one number.",
-  },
-  {
-    icon: Gauge,
-    title: "Live market data",
-    body: "Rates come straight from CoinGecko and Frankfurter, refreshed every minute and cached server-side.",
-  },
-  {
-    icon: UserRoundCheck,
-    title: "No account needed",
-    body: "Price any pair instantly. Requests stay in your own browser — there is nothing to sign up for.",
-  },
+  { icon: Receipt, key: "home.highlight1" },
+  { icon: Gauge, key: "home.highlight2" },
+  { icon: UserRoundCheck, key: "home.highlight3" },
 ];
 
 const STEPS = [
-  {
-    icon: Calculator,
-    title: "Price it",
-    body: "Choose buy, sell, swap or exchange, then type an amount on either side of the pair.",
-  },
-  {
-    icon: Wallet,
-    title: "Check out",
-    body: "Pick a payment method and walk the real checkout steps — card, bank, crypto deposit or demo balance.",
-  },
-  {
-    icon: LineChart,
-    title: "Track it",
-    body: "Follow the request through its pipeline, or set an alert and get told when a rate hits your target.",
-  },
+  { icon: Calculator, key: "home.step1" },
+  { icon: Wallet, key: "home.step2" },
+  { icon: LineChart, key: "home.step3" },
 ];
 
 export default function Home() {
+  const t = useT();
+
   return (
     <div className="relative">
       <section className="relative overflow-hidden">
@@ -63,18 +44,17 @@ export default function Home() {
           <div className="rise-in order-2 lg:order-1">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/25 bg-accent/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-accent">
               <Zap className="size-3" aria-hidden />
-              Live market rates
+              {t("home.badge")}
             </span>
 
             <h1 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
-              Exchange crypto and fiat,
+              {t("home.title")}
               <br />
-              <span className="gold-text">instantly priced</span>
+              <span className="gold-text">{t("home.titleAccent")}</span>
             </h1>
 
             <p className="mt-5 max-w-prose text-base text-muted sm:text-lg">
-              Pick a pair, enter an amount, and see exactly what you receive. Ten currencies,
-              live rates, and a fee you can actually read.
+              {t("home.subtitle")}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-2.5">
@@ -82,7 +62,7 @@ export default function Home() {
                 href="/rates"
                 className="sheen-border inline-flex items-center gap-2 rounded-xl border border-border px-5 py-3 text-sm font-medium transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 active:translate-y-0"
               >
-                Browse live rates
+                {t("home.browseRates")}
                 <ArrowRight className="size-4" aria-hidden />
               </Link>
               <Link
@@ -90,7 +70,7 @@ export default function Home() {
                 className="inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-muted transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
               >
                 <BellRing className="size-4" aria-hidden />
-                Set a rate alert
+                {t("home.setAlert")}
               </Link>
             </div>
           </div>
@@ -108,15 +88,13 @@ export default function Home() {
         <Reveal>
           <section aria-labelledby="how-heading" className="border-t border-border/60 pt-14">
             <h2 id="how-heading" className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              How it works
+              {t("home.howTitle")}
             </h2>
-            <p className="mt-2 max-w-prose text-sm text-muted">
-              Three steps, none of which move real money.
-            </p>
+            <p className="mt-2 max-w-prose text-sm text-muted">{t("home.howSubtitle")}</p>
 
             <ol className="mt-8 grid gap-5 md:grid-cols-3">
-              {STEPS.map(({ icon: Icon, title, body }, i) => (
-                <li key={title}>
+              {STEPS.map(({ icon: Icon, key }, i) => (
+                <li key={key}>
                   <Reveal delay={i * 90}>
                     <div className="surface-card h-full rounded-2xl p-5">
                       <span className="flex items-center gap-2.5">
@@ -124,11 +102,11 @@ export default function Home() {
                           <Icon className="size-4" aria-hidden />
                         </span>
                         <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted">
-                          Step {i + 1}
+                          {t("home.step", { n: i + 1 })}
                         </span>
                       </span>
-                      <p className="mt-4 font-medium">{title}</p>
-                      <p className="mt-1.5 text-sm text-muted">{body}</p>
+                      <p className="mt-4 font-medium">{t(`${key}.title`)}</p>
+                      <p className="mt-1.5 text-sm text-muted">{t(`${key}.body`)}</p>
                     </div>
                   </Reveal>
                 </li>
@@ -143,19 +121,19 @@ export default function Home() {
             className="mt-16 border-t border-border/60 pt-14"
           >
             <h2 id="why-heading" className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              Built to be read, not just used
+              {t("home.whyTitle")}
             </h2>
 
             <ul className="mt-8 grid gap-5 md:grid-cols-3">
-              {HIGHLIGHTS.map(({ icon: Icon, title, body }, i) => (
-                <li key={title}>
+              {HIGHLIGHTS.map(({ icon: Icon, key }, i) => (
+                <li key={key}>
                   <Reveal delay={i * 90}>
                     <div className="h-full rounded-2xl border border-border/70 p-5">
                       <span className="grid size-9 place-items-center rounded-xl border border-accent/25 bg-accent/10 text-accent">
                         <Icon className="size-4" aria-hidden />
                       </span>
-                      <p className="mt-4 font-medium">{title}</p>
-                      <p className="mt-1.5 text-sm text-muted">{body}</p>
+                      <p className="mt-4 font-medium">{t(`${key}.title`)}</p>
+                      <p className="mt-1.5 text-sm text-muted">{t(`${key}.body`)}</p>
                     </div>
                   </Reveal>
                 </li>
@@ -176,21 +154,14 @@ export default function Home() {
               id="demo-heading"
               className="mt-5 text-2xl font-semibold tracking-tight sm:text-3xl"
             >
-              Why nothing here can take your money
+              {t("home.demoTitle")}
             </h2>
-            <p className="mt-3 max-w-prose text-sm text-muted">
-              This is a portfolio project, so the honest version matters more than a
-              convincing one. Rates are real and fetched live, but no payment provider is
-              ever contacted, the deposit addresses are malformed on purpose so no wallet
-              will accept them, the card field is fixed to a published test number, and
-              every request lives in your own browser. There is no server holding funds,
-              because there are no funds.
-            </p>
+            <p className="mt-3 max-w-prose text-sm text-muted">{t("home.demoBody")}</p>
             <Link
               href="/history"
               className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline"
             >
-              See the requests you have made
+              {t("home.seeRequests")}
               <ArrowRight className="size-3.5" aria-hidden />
             </Link>
           </section>

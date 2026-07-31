@@ -23,6 +23,7 @@ import {
   payoutLabelForMode,
   type OperationMode,
 } from "@/lib/operations";
+import { useT } from "@/lib/i18n/context";
 
 type RateResponse = { rate: number; updatedAt: string };
 
@@ -34,6 +35,7 @@ function formatAmount(value: number): string {
 }
 
 export function ExchangeCalculator() {
+  const t = useT();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -65,15 +67,21 @@ export function ExchangeCalculator() {
   const [rate, setRate] = useState<number | null>(null);
   const [rateUpdatedAt, setRateUpdatedAt] = useState<string | null>(null);
   const [rateLoading, setRateLoading] = useState(false);
-  const [rateError, setRateError] = useState<string | null>(null);
+  // Store the failure as a flag, not a translated string: the copy has to
+  // follow the active language, and keeping text in state would also make the
+  // fetch effect depend on the translator.
+  const [rateFailed, setRateFailed] = useState(false);
   const [contact, setContact] = useState("");
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  // Keep the reason, not the sentence, so the message follows the language.
+  const [submitError, setSubmitError] = useState<
+    { key: string; params?: Record<string, string | number> } | null
+  >(null);
 
   useEffect(() => {
     let cancelled = false;
     async function loadRate() {
       setRateLoading(true);
-      setRateError(null);
+      setRateFailed(false);
       try {
         const res = await fetch(`/api/rates?from=${giveCurrency}&to=${receiveCurrency}`);
         if (!res.ok) throw new Error("failed");
@@ -83,7 +91,7 @@ export function ExchangeCalculator() {
           setRateUpdatedAt(data.updatedAt);
         }
       } catch {
-        if (!cancelled) setRateError("Could not load live rate. Try again.");
+        if (!cancelled) setRateFailed(true);
       } finally {
         if (!cancelled) setRateLoading(false);
       }
@@ -150,11 +158,12 @@ export function ExchangeCalculator() {
       isCurrencySupported: isSupportedCurrency,
     });
     if (!validation.valid) {
-      setSubmitError(validation.errors[0]);
+      const issue = validation.issues[0];
+      setSubmitError({ key: `validation.${issue.code}`, params: issue.params });
       return;
     }
     if (!contact.trim()) {
-      setSubmitError("Please enter a contact (e.g. email) for the demo request");
+      setSubmitError({ key: "calc.errorContact" });
       return;
     }
 
@@ -181,14 +190,14 @@ export function ExchangeCalculator() {
         <div className="relative flex flex-col gap-3">
           <div className="rounded-2xl bg-background/60 p-4">
             <CurrencySelect
-              label="You give"
+              label={t("calc.youGive")}
               value={giveCurrency}
               onChange={setGiveCurrency}
               options={giveOptions}
             />
             <label className="mt-3 flex flex-col gap-1.5">
               <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-                Amount {direction === "receive" && "(estimated)"}
+                {direction === "receive" ? t("calc.amountEstimated") : t("calc.amount")}
               </span>
               <input
                 type="number"
@@ -204,7 +213,7 @@ export function ExchangeCalculator() {
           <button
             type="button"
             onClick={swapCurrencies}
-            aria-label="Swap currencies"
+            aria-label={t("calc.swap")}
             className="group absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-border bg-card p-2.5 text-accent shadow-lg transition-all duration-300 hover:scale-110 hover:border-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 active:scale-95"
           >
             <ArrowUpDown
@@ -215,14 +224,14 @@ export function ExchangeCalculator() {
 
           <div className="rounded-2xl bg-background/60 p-4">
             <CurrencySelect
-              label="You receive"
+              label={t("calc.youReceive")}
               value={receiveCurrency}
               onChange={setReceiveCurrency}
               options={receiveOptions}
             />
             <label className="mt-3 flex flex-col gap-1.5">
               <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-                Amount {direction === "give" && "(estimated)"}
+                {direction === "give" ? t("calc.amountEstimated") : t("calc.amount")}
               </span>
               <span className="relative">
                 <input
@@ -237,7 +246,7 @@ export function ExchangeCalculator() {
                 {rateLoading && (
                   <Loader2
                     className="absolute right-3.5 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted"
-                    aria-label="Loading rate"
+                    aria-label={t("calc.loadingRateLabel")}
                   />
                 )}
               </span>
@@ -246,15 +255,15 @@ export function ExchangeCalculator() {
         </div>
 
         <div className="mt-4 rounded-2xl border border-border/70 p-4 text-sm">
-          {rateError ? (
+          {rateFailed ? (
             <p className="flex items-center gap-2 text-danger">
               <TriangleAlert className="size-4 shrink-0" aria-hidden />
-              {rateError}
+              {t("calc.rateError")}
             </p>
           ) : (
             <div className="flex flex-col gap-2.5">
               <div className="flex items-baseline justify-between gap-3">
-                <span className="text-muted">Market rate</span>
+                <span className="text-muted">{t("calc.rate")}</span>
                 <span className="tabular-nums">
                   {rate ? (
                     <>
@@ -266,7 +275,9 @@ export function ExchangeCalculator() {
                 </span>
               </div>
               <div className="flex items-baseline justify-between gap-3">
-                <span className="text-muted">Service fee ({DEFAULT_FEE_PERCENT}%)</span>
+                <span className="text-muted">
+                  {t("calc.fee", { percent: DEFAULT_FEE_PERCENT })}
+                </span>
                 <span className="tabular-nums">
                   {result ? (
                     <>
@@ -278,7 +289,7 @@ export function ExchangeCalculator() {
                 </span>
               </div>
               <div className="flex items-baseline justify-between gap-3 border-t border-border/70 pt-2.5 font-medium">
-                <span>You receive</span>
+                <span>{t("calc.total")}</span>
                 <span className="tabular-nums">
                   {result ? (
                     <>
@@ -291,7 +302,9 @@ export function ExchangeCalculator() {
               </div>
               {rateUpdatedAt && (
                 <p className="text-xs text-muted">
-                  Updated {new Date(rateUpdatedAt).toLocaleTimeString()}
+                  {t("calc.updated", {
+                    time: new Date(rateUpdatedAt).toLocaleTimeString(),
+                  })}
                 </p>
               )}
             </div>
@@ -300,13 +313,13 @@ export function ExchangeCalculator() {
 
         <label className="mt-4 flex flex-col gap-1.5">
           <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-            Contact for your {payoutLabelForMode(mode)} — demo, any email
+            {t("calc.contact", { payout: t(`payout.${payoutLabelForMode(mode) === "wallet address" ? "wallet" : "bank"}`) })}
           </span>
           <input
             type="text"
             value={contact}
             onChange={(e) => setContact(e.target.value)}
-            placeholder="you@example.com"
+            placeholder={t("calc.contactPlaceholder")}
             aria-invalid={submitError ? true : undefined}
             aria-describedby={submitError ? "calculator-error" : undefined}
             className="w-full rounded-xl border border-control-border bg-background px-4 py-3 text-sm transition-colors hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
@@ -320,7 +333,7 @@ export function ExchangeCalculator() {
             className="mt-3 flex items-center gap-2 text-sm text-danger"
           >
             <TriangleAlert className="size-4 shrink-0" aria-hidden />
-            {submitError}
+            {t(submitError.key, submitError.params)}
           </p>
         )}
 
@@ -330,12 +343,12 @@ export function ExchangeCalculator() {
           disabled={!result || rateLoading}
           className="gold-surface sheen mt-5 w-full rounded-xl py-3.5 text-base font-semibold text-black shadow-lg shadow-accent/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 active:translate-y-0 disabled:pointer-events-none disabled:opacity-45"
         >
-          Continue to payment
+          {t("calc.submit")}
         </button>
 
         <p className="mt-3.5 flex items-center justify-center gap-1.5 text-xs text-muted">
           <ShieldCheck className="size-3.5 text-accent" aria-hidden />
-        Simulated request — nothing is charged and no funds move
+          {t("calc.disclaimer")}
         </p>
       </div>
 

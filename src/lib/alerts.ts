@@ -51,29 +51,57 @@ export type ValidateAlertInput = {
   isCurrencySupported: (code: string) => boolean;
 };
 
+export type AlertIssue = {
+  code: "target.notPositive" | "target.sameAsCurrent" | "currency.unsupported" | "currency.same";
+  message: string;
+  params?: Record<string, string | number>;
+};
+
 export function validateAlert(input: ValidateAlertInput): {
   valid: boolean;
   errors: string[];
+  issues: AlertIssue[];
 } {
   const { targetRate, currentRate, giveCurrency, receiveCurrency, isCurrencySupported } =
     input;
-  const errors: string[] = [];
+  const issues: AlertIssue[] = [];
 
   if (!Number.isFinite(targetRate) || targetRate <= 0) {
-    errors.push("Target rate must be a positive number");
+    issues.push({
+      code: "target.notPositive",
+      message: "Target rate must be a positive number",
+    });
   } else if (targetRate === currentRate) {
-    errors.push("Target rate matches the current rate — pick a different one");
+    issues.push({
+      code: "target.sameAsCurrent",
+      message: "Target rate matches the current rate — pick a different one",
+    });
   }
 
   if (!isCurrencySupported(giveCurrency)) {
-    errors.push(`Currency ${giveCurrency} is not supported`);
+    issues.push({
+      code: "currency.unsupported",
+      message: `Currency ${giveCurrency} is not supported`,
+      params: { code: giveCurrency },
+    });
   }
   if (!isCurrencySupported(receiveCurrency)) {
-    errors.push(`Currency ${receiveCurrency} is not supported`);
+    issues.push({
+      code: "currency.unsupported",
+      message: `Currency ${receiveCurrency} is not supported`,
+      params: { code: receiveCurrency },
+    });
   }
   if (giveCurrency === receiveCurrency) {
-    errors.push("An alert needs two different currencies");
+    issues.push({
+      code: "currency.same",
+      message: "An alert needs two different currencies",
+    });
   }
 
-  return { valid: errors.length === 0, errors };
+  return {
+    valid: issues.length === 0,
+    errors: issues.map((issue) => issue.message),
+    issues,
+  };
 }

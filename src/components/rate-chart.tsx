@@ -3,6 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import { Loader2, Table2, TrendingDown, TrendingUp } from "lucide-react";
 import type { RatePoint } from "@/lib/rate-history";
+import { useT } from "@/lib/i18n/context";
 
 const RANGES = [7, 30, 90] as const;
 type Range = (typeof RANGES)[number];
@@ -32,11 +33,13 @@ function formatDay(date: string): string {
 }
 
 export function RateChart({ from, to }: { from: string; to: string }) {
+  const t = useT();
   const gradientId = useId();
   const [range, setRange] = useState<Range>(30);
   const [data, setData] = useState<HistoryResponse | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // A flag rather than a message, so the text follows the active language.
+  const [failed, setFailed] = useState(false);
   const [showTable, setShowTable] = useState(false);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
@@ -44,14 +47,14 @@ export function RateChart({ from, to }: { from: string; to: string }) {
     let cancelled = false;
     async function load() {
       setLoading(true);
-      setError(null);
+      setFailed(false);
       try {
         const res = await fetch(`/api/history?from=${from}&to=${to}&days=${range}`);
         if (!res.ok) throw new Error("failed");
         const json = (await res.json()) as HistoryResponse;
         if (!cancelled) setData(json);
       } catch {
-        if (!cancelled) setError("Rate history is unavailable right now.");
+        if (!cancelled) setFailed(true);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -94,7 +97,7 @@ export function RateChart({ from, to }: { from: string; to: string }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 id="rate-history-heading" className="text-sm font-semibold">
-            {from} → {to} rate, last {range} days
+            {t("chart.title", { from, to, days: range })}
           </h2>
           {change !== null && (
             <p
@@ -107,14 +110,16 @@ export function RateChart({ from, to }: { from: string; to: string }) {
               ) : (
                 <TrendingDown className="size-3" aria-hidden />
               )}
-              {up ? "+" : "−"}
-              {Math.abs(change).toFixed(2)}% over the period
+              {t("chart.change", {
+                sign: up ? "+" : "−",
+                value: Math.abs(change).toFixed(2),
+              })}
             </p>
           )}
         </div>
 
         <div className="flex items-center gap-1.5">
-          <div role="group" aria-label="Time range" className="flex gap-1">
+          <div role="group" aria-label={t("chart.range")} className="flex gap-1">
             {RANGES.map((r) => (
               <button
                 key={r}
@@ -139,23 +144,23 @@ export function RateChart({ from, to }: { from: string; to: string }) {
           >
             <Table2 className="size-3.5" aria-hidden />
             <span className="sr-only">
-              {showTable ? "Hide the data table" : "Show the data as a table"}
+              {showTable ? t("chart.hideTable") : t("chart.showTable")}
             </span>
           </button>
         </div>
       </div>
 
       <div className="mt-4">
-        {error ? (
-          <p className="py-10 text-center text-sm text-muted">{error}</p>
+        {failed ? (
+          <p className="py-10 text-center text-sm text-muted">{t("chart.unavailable")}</p>
         ) : !hasPlot && loading ? (
           <p className="flex items-center justify-center gap-2 py-10 text-sm text-muted">
             <Loader2 className="size-4 animate-spin" aria-hidden />
-            Loading history…
+            {t("chart.loading")}
           </p>
         ) : !hasPlot ? (
           <p className="py-10 text-center text-sm text-muted">
-            Not enough history for this pair.
+            {t("chart.notEnough")}
           </p>
         ) : (
           // Refetches hold the previous render instead of flashing a skeleton.
@@ -164,7 +169,7 @@ export function RateChart({ from, to }: { from: string; to: string }) {
               viewBox={`0 0 ${WIDTH} ${PLOT_HEIGHT + AXIS_BAND}`}
               className="w-full"
               role="img"
-              aria-label={`Line chart of the ${from} to ${to} exchange rate over the last ${range} days. Use the table button for exact values.`}
+              aria-label={t("chart.imageLabel", { from, to, days: range })}
               onPointerLeave={() => setHoverIndex(null)}
               onPointerMove={(e) => {
                 const box = e.currentTarget.getBoundingClientRect();
@@ -181,13 +186,13 @@ export function RateChart({ from, to }: { from: string; to: string }) {
               </defs>
 
               {/* Hairline solid gridlines, one step off the surface. */}
-              {[0, 0.5, 1].map((t) => (
+              {[0, 0.5, 1].map((fraction) => (
                 <line
-                  key={t}
+                  key={fraction}
                   x1={0}
                   x2={WIDTH}
-                  y1={y(min + t * span)}
-                  y2={y(min + t * span)}
+                  y1={y(min + fraction * span)}
+                  y2={y(min + fraction * span)}
                   stroke="var(--border)"
                   strokeWidth={1}
                 />
@@ -259,15 +264,15 @@ export function RateChart({ from, to }: { from: string; to: string }) {
                   <span className="font-medium text-foreground tabular-nums">
                     {formatRate(active.rate)} {to}
                   </span>{" "}
-                  on {formatDay(active.date)}
+                  {t("chart.on")} {formatDay(active.date)}
                 </>
               ) : (
                 <>
-                  Latest{" "}
+                  {t("chart.latest")}{" "}
                   <span className="font-medium text-foreground tabular-nums">
                     {formatRate(last.rate)} {to}
                   </span>{" "}
-                  per {from}
+                  {t("chart.per")} {from}
                 </>
               )}
             </p>
@@ -279,15 +284,15 @@ export function RateChart({ from, to }: { from: string; to: string }) {
         <div className="mt-4 max-h-56 overflow-y-auto rounded-xl border border-border">
           <table className="w-full text-left text-xs">
             <caption className="sr-only">
-              Daily {from} to {to} exchange rate for the last {range} days
+              {t("chart.caption", { from, to, days: range })}
             </caption>
             <thead className="sticky top-0 bg-card">
               <tr className="border-b border-border">
                 <th scope="col" className="px-3 py-2 font-medium text-muted">
-                  Date
+                  {t("chart.date")}
                 </th>
                 <th scope="col" className="px-3 py-2 text-right font-medium text-muted">
-                  Rate ({to})
+                  {t("chart.rateColumn", { code: to })}
                 </th>
               </tr>
             </thead>

@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, Check, Loader2, XCircle } from "lucide-react";
 import { setStage } from "@/lib/history-store";
 import { useRequest } from "@/lib/use-requests";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { useT } from "@/lib/i18n/context";
 import type { ExchangeStage } from "@/types/exchange-request";
 
 const STAGES: { id: ExchangeStage; label: string; body: string }[] = [
@@ -41,6 +42,7 @@ function formatAmount(value: number): string {
 }
 
 export default function ExchangeStatusPage() {
+  const t = useT();
   const params = useParams<{ id: string }>();
   const request = useRequest(params.id);
 
@@ -60,7 +62,7 @@ export default function ExchangeStatusPage() {
     return (
       <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-16 sm:px-6 lg:px-8 text-sm text-muted">
         <Loader2 className="size-4 animate-spin" aria-hidden />
-        Loading request…
+        {t("status.loading")}
       </div>
     );
   }
@@ -70,16 +72,16 @@ export default function ExchangeStatusPage() {
       <PageContainer className="pt-16">
         <div className="surface-card rounded-3xl p-10 text-center">
           <XCircle className="mx-auto size-8 text-muted" aria-hidden />
-          <p className="mt-4 font-medium">Request not found</p>
+          <p className="mt-4 font-medium">{t("status.notFound")}</p>
           <p className="mt-1.5 text-sm text-muted">
-            It may have been created in a different browser.
+            {t("status.notFoundBody")}
           </p>
           <Link
             href="/"
             className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
           >
             <ArrowLeft className="size-3.5" aria-hidden />
-            Back to calculator
+            {t("status.backToCalculator")}
           </Link>
         </div>
       </PageContainer>
@@ -91,13 +93,13 @@ export default function ExchangeStatusPage() {
     return (
       <PageContainer className="pt-16">
         <div className="surface-card rounded-3xl p-10 text-center">
-          <p className="font-medium">This request isn&apos;t paid yet</p>
-          <p className="mt-1.5 text-sm text-muted">Finish the checkout to track its status.</p>
+          <p className="font-medium">{t("status.unpaid")}</p>
+          <p className="mt-1.5 text-sm text-muted">{t("status.unpaidBody")}</p>
           <Link
             href={`/exchange/${request.id}/${request.step}`}
             className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
           >
-            Continue checkout
+            {t("status.continue")}
             <ArrowRight className="size-3.5" aria-hidden />
           </Link>
         </div>
@@ -112,9 +114,9 @@ export default function ExchangeStatusPage() {
     <PageContainer className="pb-20 pt-10">
       <Breadcrumbs
         items={[
-          { label: "Calculator", href: "/" },
-          { label: "History", href: "/history" },
-          { label: "Request status" },
+          { label: t("nav.calculator"), href: "/" },
+          { label: t("history.title"), href: "/history" },
+          { label: t("status.title") },
         ]}
       />
 
@@ -123,7 +125,7 @@ export default function ExchangeStatusPage() {
         className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-3.5" aria-hidden />
-        All requests
+        {t("history.allRequests")}
       </Link>
 
       <div className="surface-card rise-in mt-5 rounded-3xl p-6 sm:p-8">
@@ -182,15 +184,15 @@ export default function ExchangeStatusPage() {
 
         <dl className="flex flex-col gap-2.5 border-t border-border/70 pt-5 text-sm">
           <Row
-            label="Rate at creation"
+            label={t("status.rateAtCreation")}
             value={`1 ${request.giveCurrency} = ${formatAmount(request.rateAtCreation)} ${request.receiveCurrency}`}
           />
           <Row
-            label="Service fee"
+            label={t("status.serviceFee")}
             value={`${formatAmount(request.feeAmount)} ${request.receiveCurrency}`}
           />
-          <Row label="Created" value={new Date(request.createdAt).toLocaleString()} />
-          <Row label="Contact" value={request.recipientContact} />
+          <Row label={t("status.created")} value={new Date(request.createdAt).toLocaleString()} />
+          <Row label={t("status.contact")} value={request.recipientContact} />
           {request.txHash && <Row label="Transaction (simulated)" value={request.txHash} mono />}
         </dl>
 
@@ -199,7 +201,7 @@ export default function ExchangeStatusPage() {
             href="/"
             className="gold-surface sheen mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-black shadow-lg shadow-accent/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 active:translate-y-0"
           >
-            Start another exchange
+            {t("status.another")}
           </Link>
         )}
       </div>

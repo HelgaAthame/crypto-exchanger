@@ -9,6 +9,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { distanceToTargetPercent } from "@/lib/alerts";
 import { deleteAlert } from "@/lib/alerts-store";
 import { useAlerts } from "@/lib/use-alerts";
+import { useT } from "@/lib/i18n/context";
 import { computeCrossRate } from "@/lib/exchange-calc";
 
 type TickerItem = { code: string; usdPrice: number };
@@ -20,6 +21,7 @@ function formatRate(value: number): string {
 }
 
 export default function AlertsPage() {
+  const t = useT();
   const alerts = useAlerts() ?? [];
   const [usd, setUsd] = useState<Map<string, number> | null>(null);
 
@@ -49,25 +51,24 @@ export default function AlertsPage() {
 
   return (
     <PageContainer className="pb-20 pt-12">
-      <Breadcrumbs items={[{ label: "Calculator", href: "/" }, { label: "Rate alerts" }]} />
+      <Breadcrumbs items={[{ label: t("nav.calculator"), href: "/" }, { label: t("alerts.title") }]} />
 
       <div className="mb-7">
-        <h1 className="text-3xl font-semibold tracking-tight">Rate alerts</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">{t("alerts.title")}</h1>
         <p className="mt-2 max-w-prose text-sm text-muted">
-          Checked in this browser roughly once a minute, while a tab is open. Nothing is
-          emailed or pushed — this is a demo, so alerts cannot reach you elsewhere.
+          {t("alerts.subtitle")}
         </p>
       </div>
 
       {alerts.length === 0 ? (
         <div className="surface-card rounded-3xl p-10 text-center">
           <Bell className="mx-auto size-8 text-accent/60" aria-hidden />
-          <p className="mt-4 text-sm text-muted">No alerts yet.</p>
+          <p className="mt-4 text-sm text-muted">{t("alerts.empty")}</p>
           <Link
             href="/rates"
             className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
           >
-            Pick a currency to watch
+            {t("alerts.pick")}
             <ArrowRight className="size-3.5" aria-hidden />
           </Link>
         </div>
@@ -93,7 +94,7 @@ export default function AlertsPage() {
                       {alert.receiveCurrency}
                     </p>
                     <p className="mt-1.5 text-sm">
-                      Notify when {alert.direction}{" "}
+                      {t("alerts.notifyWhen", { direction: t(`alerts.${alert.direction}`) })}{" "}
                       <span className="font-medium tabular-nums">
                         {formatRate(alert.targetRate)} {alert.receiveCurrency}
                       </span>
@@ -101,7 +102,7 @@ export default function AlertsPage() {
                     <p className="mt-1 text-xs text-muted">
                       {rate ? (
                         <>
-                          Now{" "}
+                          {t("alerts.now")}{" "}
                           <span className="tabular-nums">
                             {formatRate(rate)} {alert.receiveCurrency}
                           </span>
@@ -109,12 +110,12 @@ export default function AlertsPage() {
                             <>
                               {" · "}
                               {Math.abs(distance).toFixed(2)}%{" "}
-                              {distance > 0 ? "to go" : "past target"}
+                              {distance > 0 ? t("alerts.toGo") : t("alerts.pastTarget")}
                             </>
                           )}
                         </>
                       ) : (
-                        "Current rate unavailable"
+                        t("alerts.rateUnavailable")
                       )}
                     </p>
                   </div>
@@ -130,12 +131,12 @@ export default function AlertsPage() {
                       {triggered ? (
                         <>
                           <BellRing className="size-3" aria-hidden />
-                          Triggered
+                          {t("alerts.triggered")}
                         </>
                       ) : (
                         <>
                           <Bell className="size-3" aria-hidden />
-                          Waiting
+                          {t("alerts.waiting")}
                         </>
                       )}
                     </span>
@@ -146,7 +147,10 @@ export default function AlertsPage() {
                     >
                       <Trash2 className="size-3.5" aria-hidden />
                       <span className="sr-only">
-                        Delete alert for {alert.giveCurrency} to {alert.receiveCurrency}
+                        {t("alerts.delete", {
+                          from: alert.giveCurrency,
+                          to: alert.receiveCurrency,
+                        })}
                       </span>
                     </button>
                   </div>

@@ -6,16 +6,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
+import { useT } from "@/lib/i18n/context";
 
 const LINKS = [
-  { href: "/", label: "Calculator" },
-  { href: "/rates", label: "Rates" },
-  { href: "/alerts", label: "Alerts" },
-  { href: "/history", label: "History" },
+  { href: "/", key: "nav.calculator" },
+  { href: "/rates", key: "nav.rates" },
+  { href: "/alerts", key: "nav.alerts" },
+  { href: "/history", key: "nav.history" },
 ];
 
 export function NavBar() {
   const pathname = usePathname();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const burgerRef = useRef<HTMLButtonElement>(null);
@@ -68,15 +71,15 @@ export function NavBar() {
               Crypto Exchanger
             </span>
             <span className="hidden text-[10px] uppercase tracking-[0.18em] text-muted sm:block">
-              live rates · demo
+              {t("nav.tagline")}
             </span>
           </span>
         </Link>
 
         <div className="flex shrink-0 items-center gap-1">
           {/* Full nav from sm up; below that it moves into the panel. */}
-          <nav aria-label="Main" className="hidden items-center gap-1.5 text-sm sm:flex">
-            {LINKS.map(({ href, label }) => {
+          <nav aria-label={t("nav.main")} className="hidden items-center gap-1.5 text-sm sm:flex">
+            {LINKS.map(({ href, key }) => {
               const isCurrent = pathname === href;
               return (
                 <Link
@@ -85,12 +88,13 @@ export function NavBar() {
                   aria-current={isCurrent ? "page" : undefined}
                   className={`rounded-full px-3.5 py-2 transition-colors hover:bg-accent/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${linkClass(isCurrent)}`}
                 >
-                  {label}
+                  {t(key)}
                 </Link>
               );
             })}
           </nav>
 
+          <LanguageToggle />
           <ThemeToggle />
 
           <button
@@ -102,7 +106,7 @@ export function NavBar() {
             className="grid size-9 place-items-center rounded-full border border-border/70 text-muted transition-colors hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 sm:hidden"
           >
             {open ? <X className="size-4" aria-hidden /> : <Menu className="size-4" aria-hidden />}
-            <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
+            <span className="sr-only">{open ? t("nav.closeMenu") : t("nav.openMenu")}</span>
           </button>
         </div>
       </div>
@@ -113,8 +117,8 @@ export function NavBar() {
         hidden={!open}
         className="border-t border-border/60 bg-shell backdrop-blur-xl sm:hidden"
       >
-        <nav aria-label="Main" className="flex flex-col gap-1 px-4 py-3">
-          {LINKS.map(({ href, label }) => {
+        <nav aria-label={t("nav.main")} className="flex flex-col gap-1 px-4 py-3">
+          {LINKS.map(({ href, key }) => {
             const isCurrent = pathname === href;
             return (
               <Link
@@ -125,7 +129,7 @@ export function NavBar() {
                 onClick={() => setOpen(false)}
                 className={`rounded-xl px-3.5 py-2.5 text-sm transition-colors hover:bg-accent/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${linkClass(isCurrent)}`}
               >
-                {label}
+                {t(key)}
               </Link>
             );
           })}

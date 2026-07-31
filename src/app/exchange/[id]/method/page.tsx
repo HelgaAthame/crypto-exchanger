@@ -7,62 +7,34 @@ import { CheckoutShell } from "@/components/checkout/checkout-shell";
 import { nextStep } from "@/lib/checkout-flow";
 import { setPaymentMethod, setStep } from "@/lib/history-store";
 import type { PaymentMethod } from "@/types/exchange-request";
+import { useT } from "@/lib/i18n/context";
 
-const METHODS: {
-  id: PaymentMethod;
-  icon: typeof CreditCard;
-  title: string;
-  body: string;
-  note: string;
-}[] = [
-  {
-    id: "card",
-    icon: CreditCard,
-    title: "Debit or credit card",
-    body: "Instant. Includes a simulated 3-D Secure confirmation step.",
-    note: "Test card only",
-  },
-  {
-    id: "bank",
-    icon: Banknote,
-    title: "Bank transfer",
-    body: "Lower fee, settles in 1–2 business days.",
-    note: "Demo IBAN",
-  },
-  {
-    id: "crypto",
-    icon: Wallet,
-    title: "Crypto deposit",
-    body: "Send from your own wallet to a deposit address.",
-    note: "Address is not spendable",
-  },
-  {
-    id: "demo-balance",
-    icon: Zap,
-    title: "Demo balance",
-    body: "Skip payment details entirely and see the full flow instantly.",
-    note: "Fastest",
-  },
+const METHODS: { id: PaymentMethod; icon: typeof CreditCard; key: string }[] = [
+  { id: "card", icon: CreditCard, key: "card" },
+  { id: "bank", icon: Banknote, key: "bank" },
+  { id: "crypto", icon: Wallet, key: "crypto" },
+  { id: "demo-balance", icon: Zap, key: "balance" },
 ];
 
 export default function MethodPage() {
+  const t = useT();
   const router = useRouter();
   const [selected, setSelected] = useState<PaymentMethod | null>(null);
 
   return (
     <CheckoutShell
       step="method"
-      title="How would you like to pay?"
-      subtitle="The next steps adapt to the method you pick."
+      title={t("method.title")}
+      subtitle={t("method.subtitle2")}
     >
       {(request) => (
         <>
           <div
             role="radiogroup"
-            aria-label="Payment method"
+            aria-label={t("method.label")}
             className="flex flex-col gap-2.5"
           >
-            {METHODS.map(({ id, icon: Icon, title, body, note }) => {
+            {METHODS.map(({ id, icon: Icon, key }) => {
               const isSelected = (selected ?? request.paymentMethod) === id;
               return (
                 <button
@@ -88,12 +60,14 @@ export default function MethodPage() {
                   </span>
                   <span className="flex-1">
                     <span className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium">{title}</span>
+                      <span className="text-sm font-medium">{t(`method.${key}`)}</span>
                       <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted">
-                        {note}
+                        {t(`method.${key}Note`)}
                       </span>
                     </span>
-                    <span className="mt-1 block text-sm text-muted">{body}</span>
+                    <span className="mt-1 block text-sm text-muted">
+                      {t(`method.${key}Body`)}
+                    </span>
                   </span>
                 </button>
               );
@@ -115,7 +89,7 @@ export default function MethodPage() {
             }}
             className="gold-surface sheen mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-black shadow-lg shadow-accent/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 active:translate-y-0 disabled:pointer-events-none disabled:opacity-45"
           >
-            Continue
+            {t("method.continue")}
             <ArrowRight className="size-4" aria-hidden />
           </button>
         </>

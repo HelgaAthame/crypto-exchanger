@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Pause, Play, TrendingDown, TrendingUp } from "lucide-react";
 import { CurrencyIcon } from "@/components/currency-icon";
+import { useT } from "@/lib/i18n/context";
 
 type TickerItem = {
   code: string;
@@ -37,6 +38,7 @@ function formatPrice(value: number): string {
 }
 
 export function RatesTicker() {
+  const t = useT();
   const [items, setItems] = useState<TickerItem[]>([]);
   // WCAG 2.2.2: auto-scrolling content that runs longer than five seconds
   // needs a control that does not depend on hover.
@@ -167,7 +169,7 @@ export function RatesTicker() {
       >
         {paused ? <Play className="size-3" aria-hidden /> : <Pause className="size-3" aria-hidden />}
         <span className="sr-only">
-          {paused ? "Resume the rates ticker" : "Pause the rates ticker"}
+          {paused ? t("ticker.resume") : t("ticker.pause")}
         </span>
       </button>
 
@@ -187,21 +189,25 @@ export function RatesTicker() {
             key={copy}
             className="ticker-list"
             aria-hidden={copy === 1}
-            aria-label={copy === 0 ? "Live market prices in US dollars" : undefined}
+            aria-label={copy === 0 ? t("ticker.label") : undefined}
           >
             {items.map((item) => {
               const up = item.change24h !== null && item.change24h >= 0;
               const change =
                 item.change24h === null
                   ? ""
-                  : `, ${up ? "up" : "down"} ${Math.abs(item.change24h).toFixed(2)} percent`;
+                  : `, ${up ? "+" : "-"}${Math.abs(item.change24h).toFixed(2)}%`;
               return (
                 <li key={item.code}>
                   <Link
                     href={`/rates/${item.code}`}
                     // The mirrored copy exists only to close the loop visually.
                     tabIndex={copy === 1 ? -1 : undefined}
-                    aria-label={`${item.name}, $${formatPrice(item.usdPrice)}${change} — view details`}
+                    aria-label={t("ticker.details", {
+                      name: item.name,
+                      price: formatPrice(item.usdPrice),
+                      change,
+                    })}
                     className="ticker-pill group flex items-center gap-2 whitespace-nowrap rounded-full border border-border/70 bg-card/70 px-3 py-1.5 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                   >
                     <CurrencyIcon

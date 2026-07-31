@@ -93,7 +93,7 @@ describe("validateAlert", () => {
         receiveCurrency: "USD",
         isCurrencySupported: supported,
       })
-    ).toEqual({ valid: true, errors: [] });
+    ).toEqual({ valid: true, errors: [], issues: [] });
   });
 
   it("rejects a non-positive or non-finite target", () => {
@@ -132,6 +132,24 @@ describe("validateAlert", () => {
     });
     expect(result.valid).toBe(false);
     expect(result.errors).toHaveLength(2);
+  });
+
+  it("reports a machine-readable code alongside each message", () => {
+    const result = validateAlert({
+      targetRate: 60000,
+      currentRate: 60000,
+      giveCurrency: "XYZ",
+      receiveCurrency: "XYZ",
+      isCurrencySupported: supported,
+    });
+    expect(result.issues.map((i) => i.code)).toEqual([
+      "target.sameAsCurrent",
+      "currency.unsupported",
+      "currency.unsupported",
+      "currency.same",
+    ]);
+    expect(result.issues[1].params).toEqual({ code: "XYZ" });
+    expect(result.errors).toHaveLength(result.issues.length);
   });
 
   it("rejects a pair of the same currency", () => {

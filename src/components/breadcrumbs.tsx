@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { useT } from "@/lib/i18n/context";
 
 export type Crumb = {
   label: string;
@@ -17,6 +20,7 @@ function absolute(href: string): string {
  * format Google recommends for breadcrumb rich results.
  */
 export function Breadcrumbs({ items }: { items: Crumb[] }) {
+  const t = useT();
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -35,7 +39,7 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
         // Serialised app-controlled data, not user input.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <nav aria-label="Breadcrumb" className="mb-5">
+      <nav aria-label={t("breadcrumb.label")} className="mb-5">
         <ol className="flex flex-wrap items-center gap-1 text-xs text-muted">
           {items.map((item, i) => (
             <li key={item.label} className="flex items-center gap-1">

@@ -1,15 +1,16 @@
 import Link from "next/link";
+import { useT } from "@/lib/i18n/context";
 import { Check } from "lucide-react";
 import { stepIndex, stepsForMethod } from "@/lib/checkout-flow";
 import type { ExchangeStep, PaymentMethod } from "@/types/exchange-request";
 
 const LABEL: Record<ExchangeStep, string> = {
-  method: "Method",
-  details: "Details",
-  confirm: "Confirm",
-  otp: "Authorise",
-  deposit: "Deposit",
-  status: "Status",
+  method: "step.method",
+  details: "step.details",
+  confirm: "step.confirm",
+  otp: "step.otp",
+  deposit: "step.deposit",
+  status: "step.status",
 };
 
 const PATH: Record<ExchangeStep, string> = {
@@ -29,6 +30,7 @@ type Props = {
 };
 
 export function StepProgress({ requestId, current, reached, method }: Props) {
+  const t = useT();
   const steps = stepsForMethod(method);
 
   return (
@@ -54,7 +56,7 @@ export function StepProgress({ requestId, current, reached, method }: Props) {
             ) : (
               <span className="tabular-nums">{i + 1}</span>
             )}
-            {LABEL[step]}
+            {t(LABEL[step])}
           </span>
         );
 

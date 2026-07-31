@@ -147,7 +147,7 @@ describe("validateExchangeRequest", () => {
       maxAmount: 10000,
       isCurrencySupported,
     });
-    expect(result).toEqual({ valid: true, errors: [] });
+    expect(result).toEqual({ valid: true, errors: [], issues: [] });
   });
 
   it("fails for non-positive amount", () => {

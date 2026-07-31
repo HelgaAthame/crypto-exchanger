@@ -5,6 +5,7 @@ import { BellPlus, Check } from "lucide-react";
 import { suggestDirection, validateAlert } from "@/lib/alerts";
 import { createAlert } from "@/lib/alerts-store";
 import { isSupportedCurrency } from "@/lib/currencies";
+import { useT } from "@/lib/i18n/context";
 
 type Props = {
   giveCurrency: string;
@@ -13,8 +14,11 @@ type Props = {
 };
 
 export function AlertForm({ giveCurrency, receiveCurrency, currentRate }: Props) {
+  const t = useT();
   const [target, setTarget] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<
+    { key: string; params?: Record<string, string | number> } | null
+  >(null);
   const [created, setCreated] = useState(false);
 
   const targetNumber = Number(target);
@@ -33,7 +37,8 @@ export function AlertForm({ giveCurrency, receiveCurrency, currentRate }: Props)
       isCurrencySupported: isSupportedCurrency,
     });
     if (!result.valid) {
-      setError(result.errors[0]);
+      const issue = result.issues[0];
+      setError({ key: `validation.${issue.code}`, params: issue.params });
       return;
     }
 
@@ -53,7 +58,7 @@ export function AlertForm({ giveCurrency, receiveCurrency, currentRate }: Props)
     <div className="mt-3">
       <label className="flex flex-col gap-1.5">
         <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-          Notify me when 1 {giveCurrency} is
+          {t("alerts.formLabel", { code: giveCurrency })}
         </span>
         <div className="flex gap-2">
           <input
@@ -81,21 +86,28 @@ export function AlertForm({ giveCurrency, receiveCurrency, currentRate }: Props)
             ) : (
               <BellPlus className="size-4" aria-hidden />
             )}
-            {created ? "Saved" : "Notify me"}
+            {created ? t("alerts.saved") : t("alerts.save")}
           </button>
         </div>
       </label>
 
       {error ? (
         <p id="alert-error" role="alert" className="mt-2 text-xs text-danger">
-          {error}
+          {t(error.key, error.params)}
         </p>
       ) : (
         <p id="alert-hint" className="mt-2 text-xs text-muted">
           {direction
-            ? `Fires when the rate goes ${direction} ${targetNumber} ${receiveCurrency}.`
-            : `Current rate: ${currentRate ? currentRate.toFixed(4) : "—"} ${receiveCurrency}.`}{" "}
-          Checked in this browser while a tab is open — no email or push is sent.
+            ? t("alerts.fires", {
+                direction: t(`alerts.${direction}`),
+                target: targetNumber,
+                code: receiveCurrency,
+              })
+            : t("alerts.current", {
+                rate: currentRate ? currentRate.toFixed(4) : "—",
+                code: receiveCurrency,
+              })}{" "}
+          {t("alerts.noDelivery")}
         </p>
       )}
     </div>

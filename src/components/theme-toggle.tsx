@@ -2,14 +2,16 @@
 
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
+import { useT } from "@/lib/i18n/context";
 
 export function ThemeToggle() {
+  const t = useT();
   const { resolvedTheme, setTheme } = useTheme();
 
   return (
     <button
       type="button"
-      aria-label="Toggle theme"
+      aria-label={t("theme.toggle")}
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
       className="ml-1 grid size-9 place-items-center rounded-full border border-border/70 text-muted transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 active:translate-y-0"
     >

@@ -6,6 +6,8 @@ import { DemoBanner } from "@/components/demo-banner";
 import { NavBar } from "@/components/nav-bar";
 import { RatesTicker } from "@/components/rates-ticker";
 import { AlertsWatcher } from "@/components/alerts-watcher";
+import { SkipLink } from "@/components/skip-link";
+import { LocaleProvider } from "@/lib/i18n/context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,19 +41,16 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider>
-          <a
-            href="#main"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-xl focus:bg-card focus:px-4 focus:py-2.5 focus:text-sm focus:font-medium focus:ring-2 focus:ring-accent"
-          >
-            Skip to main content
-          </a>
-          <DemoBanner />
-          <NavBar />
-          <RatesTicker />
-          <main id="main" tabIndex={-1} className="flex-1 scroll-mt-24">
-            {children}
-          </main>
-          <AlertsWatcher />
+          <LocaleProvider>
+            <SkipLink />
+            <DemoBanner />
+            <NavBar />
+            <RatesTicker />
+            <main id="main" tabIndex={-1} className="flex-1 scroll-mt-24">
+              {children}
+            </main>
+            <AlertsWatcher />
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>

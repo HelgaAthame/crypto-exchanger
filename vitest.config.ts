@@ -20,6 +20,7 @@ export default defineConfig({
         "src/lib/operations.ts",
         "src/lib/rate-history.ts",
         "src/lib/alerts.ts",
+        "src/lib/i18n/translate.ts",
       ],
       thresholds: {
         lines: 100,

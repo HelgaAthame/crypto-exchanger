@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldCheck, Smartphone } from "lucide-react";
 import { CheckoutShell } from "@/components/checkout/checkout-shell";
+import { useT } from "@/lib/i18n/context";
 import { startProcessing } from "@/lib/history-store";
 
 export default function OtpPage() {
+  const t = useT();
   const router = useRouter();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -14,8 +16,8 @@ export default function OtpPage() {
   return (
     <CheckoutShell
       step="otp"
-      title="Confirm your payment"
-      subtitle="A simulated 3-D Secure check — no bank is contacted."
+      title={t("otp.title")}
+      subtitle={t("otp.subtitle")}
     >
       {(request) => (
         <>
@@ -24,10 +26,9 @@ export default function OtpPage() {
               <Smartphone className="size-5" aria-hidden />
             </span>
             <p className="mt-4 text-sm">
-              Enter the 6-digit code “sent” to the phone on file for card ••••{" "}
-              {request.paymentDetails?.cardLast4 ?? "4242"}.
+              {t("otp.prompt", { last4: request.paymentDetails?.cardLast4 ?? "4242" })}
             </p>
-            <p className="mt-1 text-xs text-muted">Any 6 digits will pass — this is a demo.</p>
+            <p className="mt-1 text-xs text-muted">{t("otp.hint")}</p>
 
             <input
               inputMode="numeric"
@@ -38,7 +39,7 @@ export default function OtpPage() {
                 setError(null);
               }}
               placeholder="••••••"
-              aria-label="Verification code"
+              aria-label={t("otp.label")}
               aria-invalid={error ? true : undefined}
               aria-describedby={error ? "otp-error" : undefined}
               className="mt-5 w-44 rounded-xl border border-control-border bg-background px-4 py-3 text-center text-2xl tracking-[0.35em] tabular-nums transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
@@ -55,7 +56,7 @@ export default function OtpPage() {
             type="button"
             onClick={() => {
               if (code.length !== 6) {
-                setError("Enter all 6 digits");
+                setError(t("otp.error"));
                 return;
               }
               startProcessing(request.id);
@@ -64,7 +65,7 @@ export default function OtpPage() {
             className="gold-surface sheen mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-black shadow-lg shadow-accent/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 active:translate-y-0"
           >
             <ShieldCheck className="size-4" aria-hidden />
-            Verify and pay
+            {t("otp.verify")}
           </button>
         </>
       )}

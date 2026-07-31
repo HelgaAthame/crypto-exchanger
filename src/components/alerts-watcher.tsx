@@ -6,6 +6,7 @@ import { BellRing, X } from "lucide-react";
 import { isAlertTriggered, type RateAlert } from "@/lib/alerts";
 import { markTriggered } from "@/lib/alerts-store";
 import { useAlerts } from "@/lib/use-alerts";
+import { useT } from "@/lib/i18n/context";
 import { computeCrossRate } from "@/lib/exchange-calc";
 
 const POLL_MS = 60_000;
@@ -18,6 +19,7 @@ type TickerItem = { code: string; usdPrice: number };
  * UI rather than dressed up as background delivery, since there is no backend.
  */
 export function AlertsWatcher() {
+  const t = useT();
   const alerts = useAlerts();
   const [fired, setFired] = useState<RateAlert[]>([]);
 
@@ -79,7 +81,9 @@ export function AlertsWatcher() {
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium">
-            {fired.length === 1 ? "Rate alert triggered" : `${fired.length} rate alerts triggered`}
+            {fired.length === 1
+              ? t("alerts.firedOne")
+              : t("alerts.firedMany", { count: fired.length })}
           </p>
           <p className="mt-0.5 text-xs text-muted">
             {fired
@@ -92,7 +96,7 @@ export function AlertsWatcher() {
             onClick={() => setFired([])}
             className="mt-2 inline-block text-xs font-medium text-accent hover:underline"
           >
-            View alerts
+            {t("alerts.view")}
           </Link>
         </div>
         <button
@@ -101,7 +105,7 @@ export function AlertsWatcher() {
           className="grid size-7 shrink-0 place-items-center rounded-full text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
         >
           <X className="size-3.5" aria-hidden />
-          <span className="sr-only">Dismiss</span>
+          <span className="sr-only">{t("alerts.dismiss")}</span>
         </button>
       </div>
     </div>

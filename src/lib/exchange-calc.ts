@@ -65,38 +65,78 @@ export type ValidateExchangeRequestInput = {
   isCurrencySupported: (code: string) => boolean;
 };
 
+/**
+ * A machine-readable reason plus the values a message needs. The English
+ * sentence stays for tests and non-UI callers, but the interface renders from
+ * the code so validation can speak the user's language.
+ */
+export type ValidationIssue = {
+  code:
+    | "amount.notPositive"
+    | "amount.tooSmall"
+    | "amount.tooLarge"
+    | "currency.unsupported"
+    | "currency.same";
+  message: string;
+  params?: Record<string, string | number>;
+};
+
 export type ValidateExchangeRequestResult = {
   valid: boolean;
   errors: string[];
+  issues: ValidationIssue[];
 };
 
 export function validateExchangeRequest(
   input: ValidateExchangeRequestInput
 ): ValidateExchangeRequestResult {
-  const errors: string[] = [];
+  const issues: ValidationIssue[] = [];
   const { amount, giveCurrency, receiveCurrency, minAmount, maxAmount, isCurrencySupported } =
     input;
 
   if (!Number.isFinite(amount) || amount <= 0) {
-    errors.push("Amount must be a positive number");
+    issues.push({ code: "amount.notPositive", message: "Amount must be a positive number" });
   } else {
     if (amount < minAmount) {
-      errors.push(`Amount must be at least ${minAmount}`);
+      issues.push({
+        code: "amount.tooSmall",
+        message: `Amount must be at least ${minAmount}`,
+        params: { min: minAmount },
+      });
     }
     if (amount > maxAmount) {
-      errors.push(`Amount must not exceed ${maxAmount}`);
+      issues.push({
+        code: "amount.tooLarge",
+        message: `Amount must not exceed ${maxAmount}`,
+        params: { max: maxAmount },
+      });
     }
   }
 
   if (!isCurrencySupported(giveCurrency)) {
-    errors.push(`Currency ${giveCurrency} is not supported`);
+    issues.push({
+      code: "currency.unsupported",
+      message: `Currency ${giveCurrency} is not supported`,
+      params: { code: giveCurrency },
+    });
   }
   if (!isCurrencySupported(receiveCurrency)) {
-    errors.push(`Currency ${receiveCurrency} is not supported`);
+    issues.push({
+      code: "currency.unsupported",
+      message: `Currency ${receiveCurrency} is not supported`,
+      params: { code: receiveCurrency },
+    });
   }
   if (giveCurrency === receiveCurrency) {
-    errors.push("Give and receive currencies must be different");
+    issues.push({
+      code: "currency.same",
+      message: "Give and receive currencies must be different",
+    });
   }
 
-  return { valid: errors.length === 0, errors };
+  return {
+    valid: issues.length === 0,
+    errors: issues.map((issue) => issue.message),
+    issues,
+  };
 }

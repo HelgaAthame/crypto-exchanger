@@ -1,6 +1,7 @@
 "use client";
 
 import { OPERATION_MODES, type OperationMode } from "@/lib/operations";
+import { useT } from "@/lib/i18n/context";
 
 type Props = {
   value: OperationMode;
@@ -11,6 +12,7 @@ const COLS_WIDE = 4;
 const COLS_NARROW = 2;
 
 export function OperationTabs({ value, onChange }: Props) {
+  const t = useT();
   const activeIndex = Math.max(
     OPERATION_MODES.findIndex((m) => m.id === value),
     0
@@ -21,7 +23,7 @@ export function OperationTabs({ value, onChange }: Props) {
     <div>
       <div
         role="tablist"
-        aria-label="Operation"
+        aria-label={t("calc.operation")}
         className="relative grid grid-cols-2 rounded-2xl border border-border bg-background/60 p-1 xs:grid-cols-4"
       >
         {/* The indicator layer matches the track's padding box exactly, and the
@@ -63,13 +65,15 @@ export function OperationTabs({ value, onChange }: Props) {
                 isActive ? "text-black" : "text-muted hover:text-foreground"
               }`}
             >
-              {mode.label}
+              {t(`calc.mode.${mode.id}`)}
             </button>
           );
         })}
       </div>
 
-      <p className="mt-2 text-center text-xs text-muted">{active.description}</p>
+      <p className="mt-2 text-center text-xs text-muted">
+        {t(`calc.mode.${active.id}.description`)}
+      </p>
     </div>
   );
 }

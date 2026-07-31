@@ -102,6 +102,7 @@ The flow is designed to look real while making a real transfer impossible:
 - The IBAN shown for bank transfers belongs to no real account.
 - Every checkout step carries its own "no real payment is processed" notice on
   top of the site-wide demo banner.
+- English and Russian, with a language switch in the header
 - Light/dark theme, gold-on-black brand styling
 - Demo banner communicating the non-real nature of the project
 
@@ -268,6 +269,25 @@ the plot, refetches hold the previous render at reduced opacity instead of
 flashing a skeleton, and a table view exposes every value without hovering. Line
 colours were checked with the dataviz palette validator against each theme's
 surface, and dark mode uses its own step rather than a flipped light one.
+
+### Internationalisation
+
+English and Russian, switchable in the header. There is no i18n library: a
+dictionary of flat keys plus one `translate` function covers this app, and the
+function is unit-tested including its fallback chain — a missing key falls back
+to English and then to the key itself, so a half-translated build degrades to
+readable English rather than blank labels.
+
+The preference is read through `useSyncExternalStore`, not state seeded in an
+effect, which keeps the server render from being followed by a cascading
+re-render, and `<html lang>` follows the choice.
+
+Two things had to change to make translation honest rather than cosmetic.
+Validation used to return English sentences, so `validateExchangeRequest` and
+`validateAlert` now also return `issues` with a machine-readable `code` and its
+parameters; the UI renders from the code. And components that stored a
+translated error string in state now store the reason instead, so an error
+already on screen switches language with everything else.
 
 ### Custom select
 

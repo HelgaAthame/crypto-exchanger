@@ -1,6 +1,16 @@
+"use client";
+
 import { ArrowRight } from "lucide-react";
 import { CurrencyIcon } from "@/components/currency-icon";
-import type { ExchangeRequest } from "@/types/exchange-request";
+import type { ExchangeRequest, PaymentMethod } from "@/types/exchange-request";
+import { useT } from "@/lib/i18n/context";
+
+const METHOD_KEY: Record<PaymentMethod, string> = {
+  card: "method.card",
+  bank: "method.bank",
+  crypto: "method.crypto",
+  "demo-balance": "method.balance",
+};
 
 function formatAmount(value: number): string {
   if (value >= 1000) return value.toLocaleString("en-US", { maximumFractionDigits: 2 });
@@ -10,13 +20,14 @@ function formatAmount(value: number): string {
 
 /** Stays visible through every checkout step, so the numbers never leave view. */
 export function OrderSummary({ request }: { request: ExchangeRequest }) {
+  const t = useT();
   return (
     <aside
       aria-labelledby="order-summary-heading"
       className="surface-card rounded-3xl p-5 lg:sticky lg:top-24"
     >
       <h2 id="order-summary-heading" className="text-sm font-semibold">
-        Order summary
+        {t("checkout.summary")}
       </h2>
 
       <div className="mt-4 flex items-center justify-between gap-2 rounded-2xl bg-background/60 p-3.5">
@@ -39,15 +50,17 @@ export function OrderSummary({ request }: { request: ExchangeRequest }) {
 
       <dl className="mt-4 flex flex-col gap-2.5 text-sm">
         <Row
-          label="Rate"
+          label={t("checkout.rate")}
           value={`1 ${request.giveCurrency} = ${formatAmount(request.rateAtCreation)} ${request.receiveCurrency}`}
         />
         <Row
-          label="Service fee"
+          label={t("checkout.fee")}
           value={`${formatAmount(request.feeAmount)} ${request.receiveCurrency}`}
         />
-        {request.paymentMethod && <Row label="Method" value={request.paymentMethod} />}
-        <Row label="Contact" value={request.recipientContact} />
+        {request.paymentMethod && (
+          <Row label={t("checkout.method")} value={t(METHOD_KEY[request.paymentMethod])} />
+        )}
+        <Row label={t("checkout.contact")} value={request.recipientContact} />
       </dl>
     </aside>
   );

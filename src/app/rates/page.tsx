@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CurrencyIcon } from "@/components/currency-icon";
+import { useT } from "@/lib/i18n/context";
 
 type RateRow = {
   code: string;
@@ -24,9 +25,10 @@ function formatPrice(value: number): string {
 }
 
 export default function RatesPage() {
+  const t = useT();
   const [rows, setRows] = useState<RateRow[] | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,10 +40,10 @@ export default function RatesPage() {
         if (!cancelled) {
           setRows(data.items);
           setUpdatedAt(data.updatedAt);
-          setError(null);
+          setError(false);
         }
       } catch {
-        if (!cancelled) setError("Could not load rates. They will refresh shortly.");
+        if (!cancelled) setError(true);
       }
     }
     load();
@@ -54,39 +56,39 @@ export default function RatesPage() {
 
   return (
     <PageContainer className="pb-20 pt-12">
-      <Breadcrumbs items={[{ label: "Calculator", href: "/" }, { label: "Live rates" }]} />
+      <Breadcrumbs items={[{ label: t("nav.calculator"), href: "/" }, { label: t("rates.title") }]} />
 
       <div className="mb-7">
-        <h1 className="text-3xl font-semibold tracking-tight">Live rates</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">{t("rates.title")}</h1>
         <p className="mt-2 max-w-prose text-sm text-muted">
-          US dollar price and 24-hour change for every currency this demo supports.
-          {updatedAt && ` Updated ${new Date(updatedAt).toLocaleTimeString()}.`}
+          {t("rates.subtitle")}{" "}
+          {updatedAt && t("rates.updated", { time: new Date(updatedAt).toLocaleTimeString() })}
         </p>
       </div>
 
-      {error && <p className="mb-4 text-sm text-danger">{error}</p>}
+      {error && <p className="mb-4 text-sm text-danger">{t("rates.error")}</p>}
 
       {rows === null ? (
         <p className="flex items-center justify-center gap-2 py-16 text-sm text-muted">
           <Loader2 className="size-4 animate-spin" aria-hidden />
-          Loading rates…
+          {t("rates.loading")}
         </p>
       ) : (
         <div className="surface-card overflow-x-auto rounded-2xl">
           <table className="w-full min-w-md text-left text-sm">
             <caption className="sr-only">
-              Supported currencies with their US dollar price and 24-hour change
+              {t("rates.caption")}
             </caption>
             <thead>
               <tr className="border-b border-border text-xs uppercase tracking-wider text-muted">
                 <th scope="col" className="px-4 py-3 font-medium">
-                  Currency
+                  {t("rates.currency")}
                 </th>
                 <th scope="col" className="px-4 py-3 text-right font-medium">
-                  Price (USD)
+                  {t("rates.price")}
                 </th>
                 <th scope="col" className="px-4 py-3 text-right font-medium">
-                  24h
+                  {t("rates.change")}
                 </th>
               </tr>
             </thead>
@@ -138,8 +140,7 @@ export default function RatesPage() {
       )}
 
       <p className="mt-4 text-xs text-muted">
-        Crypto prices come from CoinGecko, fiat from Frankfurter. Fiat pairs have no
-        24-hour figure because the source publishes one rate per business day.
+        {t("rates.footnote")}
       </p>
     </PageContainer>
   );

@@ -5,6 +5,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { ArrowRight, Clock, History as HistoryIcon } from "lucide-react";
 import { useAllRequests } from "@/lib/use-requests";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { useT } from "@/lib/i18n/context";
 import type { ExchangeRequest } from "@/types/exchange-request";
 
 const STATUS_STYLE: Record<ExchangeRequest["status"], string> = {
@@ -20,28 +21,29 @@ function formatAmount(value: number): string {
 }
 
 export default function HistoryPage() {
+  const t = useT();
   const requests = useAllRequests() ?? [];
 
   return (
     <PageContainer className="pb-20 pt-12">
-      <Breadcrumbs items={[{ label: "Calculator", href: "/" }, { label: "History" }]} />
+      <Breadcrumbs items={[{ label: t("nav.calculator"), href: "/" }, { label: t("history.title") }]} />
 
       <div className="mb-7">
-        <h1 className="text-3xl font-semibold tracking-tight">Request history</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">{t("history.title")}</h1>
         <p className="mt-2 max-w-prose text-sm text-muted">
-          Demo requests stored in this browser only — nothing is sent to a server.
+          {t("history.subtitle")}
         </p>
       </div>
 
       {requests.length === 0 ? (
         <div className="rounded-3xl border border-border bg-card p-10 text-center">
           <HistoryIcon className="mx-auto size-8 text-accent/60" aria-hidden />
-          <p className="mt-4 text-sm text-muted">No requests yet.</p>
+          <p className="mt-4 text-sm text-muted">{t("history.empty")}</p>
           <Link
             href="/"
             className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
           >
-            Create your first one
+            {t("history.create")}
             <ArrowRight className="size-3.5" aria-hidden />
           </Link>
         </div>

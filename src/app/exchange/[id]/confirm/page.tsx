@@ -6,16 +6,16 @@ import { Lock, Timer } from "lucide-react";
 import { CheckoutShell } from "@/components/checkout/checkout-shell";
 import { nextStep } from "@/lib/checkout-flow";
 import { setStep, startProcessing } from "@/lib/history-store";
-import { OPERATION_MODES } from "@/lib/operations";
+import { useT } from "@/lib/i18n/context";
 import type { ExchangeRequest, PaymentMethod } from "@/types/exchange-request";
 
 const RATE_LOCK_SECONDS = 120;
 
-const METHOD_LABEL: Record<PaymentMethod, string> = {
-  card: "Debit or credit card",
-  bank: "Bank transfer",
-  crypto: "Crypto deposit",
-  "demo-balance": "Demo balance",
+const METHOD_KEY: Record<PaymentMethod, string> = {
+  card: "method.card",
+  bank: "method.bank",
+  crypto: "method.crypto",
+  "demo-balance": "method.balance",
 };
 
 function formatAmount(value: number): string {
@@ -37,6 +37,7 @@ function describeDetails(request: ExchangeRequest): string {
 }
 
 export default function ConfirmPage() {
+  const t = useT();
   const router = useRouter();
   const [secondsLeft, setSecondsLeft] = useState(RATE_LOCK_SECONDS);
 
@@ -54,8 +55,8 @@ export default function ConfirmPage() {
   return (
     <CheckoutShell
       step="confirm"
-      title="Review and confirm"
-      subtitle="Check the numbers before continuing."
+      title={t("confirm.title")}
+      subtitle={t("confirm.subtitle")}
     >
       {(request) => (
         <>
@@ -79,28 +80,28 @@ export default function ConfirmPage() {
             <dl className="mt-4 flex flex-col gap-2.5 border-t border-border/70 pt-4 text-sm">
               {request.mode && (
                 <Row
-                  label="Operation"
-                  value={
-                    OPERATION_MODES.find((m) => m.id === request.mode)?.label ?? request.mode
-                  }
+                  label={t("confirm.operation")}
+                  value={t(`calc.mode.${request.mode}`)}
                 />
               )}
               <Row
-                label="Rate"
+                label={t("confirm.rate")}
                 value={`1 ${request.giveCurrency} = ${formatAmount(request.rateAtCreation)} ${request.receiveCurrency}`}
               />
               <Row
-                label="Service fee"
+                label={t("confirm.fee")}
                 value={`${formatAmount(request.feeAmount)} ${request.receiveCurrency}`}
               />
               <Row
-                label="Payment method"
-                value={request.paymentMethod ? METHOD_LABEL[request.paymentMethod] : "—"}
+                label={t("confirm.paymentMethod")}
+                value={
+                  request.paymentMethod ? t(METHOD_KEY[request.paymentMethod]) : "—"
+                }
               />
               {request.paymentMethod !== "demo-balance" && (
-                <Row label="Details" value={describeDetails(request)} />
+                <Row label={t("confirm.details")} value={describeDetails(request)} />
               )}
-              <Row label="Contact" value={request.recipientContact} />
+              <Row label={t("confirm.contact")} value={request.recipientContact} />
             </dl>
           </div>
 
@@ -111,10 +112,10 @@ export default function ConfirmPage() {
             >
               <Timer className="size-3.5" aria-hidden />
               {expired ? (
-                "Rate lock expired."
+                t("confirm.expired")
               ) : (
                 <>
-                  Rate locked for{" "}
+                  {t("confirm.locked")}{" "}
                   <span className="font-medium tabular-nums text-foreground">
                     {mm}:{ss}
                   </span>
@@ -128,7 +129,7 @@ export default function ConfirmPage() {
               onClick={() => setSecondsLeft(RATE_LOCK_SECONDS)}
               className="rounded-full border border-border px-3 py-1 text-xs font-medium transition-colors hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
-              {expired ? "Restart rate lock" : "Extend"}
+              {expired ? t("confirm.restart") : t("confirm.extend")}
             </button>
           </div>
 
@@ -148,7 +149,7 @@ export default function ConfirmPage() {
             className="gold-surface sheen mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-black shadow-lg shadow-accent/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 active:translate-y-0 disabled:pointer-events-none disabled:opacity-45"
           >
             <Lock className="size-4" aria-hidden />
-            Confirm &amp; pay
+            {t("confirm.pay")}
           </button>
         </>
       )}

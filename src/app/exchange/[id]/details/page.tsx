@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Lock } from "lucide-react";
 import { CheckoutShell } from "@/components/checkout/checkout-shell";
+import { useT } from "@/lib/i18n/context";
 import { nextStep } from "@/lib/checkout-flow";
 import { setPaymentDetails, setStep } from "@/lib/history-store";
 import type { PaymentDetails } from "@/types/exchange-request";
@@ -16,6 +17,7 @@ const FIELD =
   "w-full rounded-xl border border-control-border bg-background px-4 py-3 text-sm transition-colors hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25";
 
 export default function DetailsPage() {
+  const t = useT();
   const router = useRouter();
   const [cardHolder, setCardHolder] = useState("");
   const [accountHolder, setAccountHolder] = useState("");
@@ -25,8 +27,8 @@ export default function DetailsPage() {
   return (
     <CheckoutShell
       step="details"
-      title="Payment details"
-      subtitle="Nothing here is validated against a real payment network."
+      title={t("details.title")}
+      subtitle={t("details.subtitle")}
     >
       {(request) => {
         const method = request.paymentMethod;
@@ -37,19 +39,19 @@ export default function DetailsPage() {
 
           if (method === "card") {
             if (!cardHolder.trim()) {
-              setError("Enter the name on the card");
+              setError(t("details.errorCard"));
               return;
             }
             details = { cardHolder: cardHolder.trim(), cardLast4: "4242" };
           } else if (method === "bank") {
             if (!accountHolder.trim()) {
-              setError("Enter the account holder name");
+              setError(t("details.errorAccount"));
               return;
             }
             details = { accountHolder: accountHolder.trim(), iban: DEMO_IBAN };
           } else {
             if (!payoutAddress.trim()) {
-              setError("Enter the address that should receive the funds");
+              setError(t("details.errorAddress"));
               return;
             }
             details = { payoutAddress: payoutAddress.trim() };
@@ -67,7 +69,7 @@ export default function DetailsPage() {
               <div className="flex flex-col gap-3.5">
                 <label className="flex flex-col gap-1.5">
                   <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-                    Card number
+                    {t("details.cardNumber")}
                   </span>
                   <span className="relative">
                     <input
@@ -82,14 +84,14 @@ export default function DetailsPage() {
                     />
                   </span>
                   <span id="card-note" className="text-xs text-muted">
-                    Fixed to a public test number — you cannot enter a real card here.
+                    {t("details.cardNote")}
                   </span>
                 </label>
 
                 <div className="grid grid-cols-2 gap-3">
                   <label className="flex flex-col gap-1.5">
                     <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-                      Expiry
+                      {t("details.expiry")}
                     </span>
                     <input
                       readOnly
@@ -99,7 +101,7 @@ export default function DetailsPage() {
                   </label>
                   <label className="flex flex-col gap-1.5">
                     <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-                      CVC
+                      {t("details.cvc")}
                     </span>
                     <input
                       readOnly
@@ -111,7 +113,7 @@ export default function DetailsPage() {
 
                 <label className="flex flex-col gap-1.5">
                   <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-                    Name on card
+                    {t("details.nameOnCard")}
                   </span>
                   <input
                     value={cardHolder}
@@ -127,7 +129,7 @@ export default function DetailsPage() {
               <div className="flex flex-col gap-3.5">
                 <label className="flex flex-col gap-1.5">
                   <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-                    IBAN
+                    {t("details.iban")}
                   </span>
                   <input
                     readOnly
@@ -136,12 +138,12 @@ export default function DetailsPage() {
                     className={`${FIELD} cursor-not-allowed tabular-nums opacity-70`}
                   />
                   <span id="iban-note" className="text-xs text-muted">
-                    Placeholder IBAN — it belongs to no real account.
+                    {t("details.ibanNote")}
                   </span>
                 </label>
                 <label className="flex flex-col gap-1.5">
                   <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-                    Account holder
+                    {t("details.accountHolder")}
                   </span>
                   <input
                     value={accountHolder}
@@ -156,16 +158,18 @@ export default function DetailsPage() {
             {method === "crypto" && (
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
-                  Your {request.receiveCurrency} address
+                  {t("details.address", { code: request.receiveCurrency })}
                 </span>
                 <input
                   value={payoutAddress}
                   onChange={(e) => setPayoutAddress(e.target.value)}
-                  placeholder={`Where should we send the ${request.receiveCurrency}?`}
+                  placeholder={t("details.addressPlaceholder", {
+                    code: request.receiveCurrency,
+                  })}
                   className={`${FIELD} font-mono text-xs`}
                 />
                 <span className="text-xs text-muted">
-                  Not verified on-chain — this is a demo field.
+                  {t("details.addressNote")}
                 </span>
               </label>
             )}
@@ -181,7 +185,7 @@ export default function DetailsPage() {
               onClick={submit}
               className="gold-surface sheen mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-black shadow-lg shadow-accent/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 active:translate-y-0"
             >
-              Review order
+              {t("details.review")}
               <ArrowRight className="size-4" aria-hidden />
             </button>
           </>

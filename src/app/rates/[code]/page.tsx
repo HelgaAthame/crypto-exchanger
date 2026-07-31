@@ -8,6 +8,7 @@ import { ArrowRight, Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { AlertForm } from "@/components/alert-form";
 import { CurrencyIcon } from "@/components/currency-icon";
+import { useT } from "@/lib/i18n/context";
 import { RateChart } from "@/components/rate-chart";
 import { ALL_CURRENCIES, getCurrency } from "@/lib/currencies";
 import { computeCrossRate } from "@/lib/exchange-calc";
@@ -25,6 +26,7 @@ function formatPrice(value: number): string {
 }
 
 export default function CurrencyDetailPage() {
+  const t = useT();
   const params = useParams<{ code: string }>();
   const code = params.code?.toUpperCase();
   const currency = code ? getCurrency(code) : undefined;
@@ -62,8 +64,8 @@ export default function CurrencyDetailPage() {
     <PageContainer className="pb-20 pt-10">
       <Breadcrumbs
         items={[
-          { label: "Calculator", href: "/" },
-          { label: "Live rates", href: "/rates" },
+          { label: t("nav.calculator"), href: "/" },
+          { label: t("rates.title"), href: "/rates" },
           { label: currency.code },
         ]}
       />
@@ -76,7 +78,7 @@ export default function CurrencyDetailPage() {
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">{currency.name}</h1>
             <p className="text-sm text-muted">
-              {currency.code} · {isCrypto ? "Cryptocurrency" : "Fiat currency"}
+              {currency.code} · {isCrypto ? t("rates.crypto") : t("rates.fiat")}
             </p>
           </div>
         </div>
@@ -99,15 +101,17 @@ export default function CurrencyDetailPage() {
                   ) : (
                     <TrendingDown className="size-4" aria-hidden />
                   )}
-                  {up ? "+" : "−"}
-                  {Math.abs(self.change24h).toFixed(2)}% in the last 24 hours
+                  {t("rates.change24h", {
+                    sign: up ? "+" : "−",
+                    value: Math.abs(self.change24h).toFixed(2),
+                  })}
                 </p>
               )}
             </>
           ) : (
             <p className="flex items-center gap-2 text-sm text-muted">
               <Loader2 className="size-4 animate-spin" aria-hidden />
-              Loading price…
+              {t("rates.loadingPrice")}
             </p>
           )}
         </div>
@@ -121,7 +125,9 @@ export default function CurrencyDetailPage() {
             }
             className="gold-surface sheen inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-black shadow-lg shadow-accent/25 transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 active:translate-y-0"
           >
-            {isCrypto ? `Buy ${currency.code}` : `Exchange ${currency.code}`}
+            {isCrypto
+              ? t("rates.buy", { code: currency.code })
+              : t("rates.exchange", { code: currency.code })}
             <ArrowRight className="size-4" aria-hidden />
           </Link>
           {isCrypto && (
@@ -129,7 +135,7 @@ export default function CurrencyDetailPage() {
               href={`/?mode=sell&give=${currency.code}`}
               className="sheen-border inline-flex items-center gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-medium transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 active:translate-y-0"
             >
-              Sell {currency.code}
+              {t("rates.sell", { code: currency.code })}
             </Link>
           )}
         </div>
@@ -145,7 +151,7 @@ export default function CurrencyDetailPage() {
             className="surface-card rounded-3xl p-5 sm:p-6"
           >
             <h2 id="alert-heading" className="text-sm font-semibold">
-              Watch this rate
+              {t("rates.watchTitle")}
             </h2>
             <AlertForm
               giveCurrency={currency.code}
@@ -158,19 +164,19 @@ export default function CurrencyDetailPage() {
 
       <section aria-labelledby="cross-rates-heading" className="surface-card rounded-3xl p-5 sm:p-6">
         <h2 id="cross-rates-heading" className="text-sm font-semibold">
-          1 {currency.code} in other currencies
+          {t("rates.crossTitle", { code: currency.code })}
         </h2>
 
         {rows === null ? (
           <p className="mt-4 flex items-center gap-2 text-sm text-muted">
             <Loader2 className="size-4 animate-spin" aria-hidden />
-            Loading…
+            {t("common.loading")}
           </p>
         ) : (
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-left text-sm">
               <caption className="sr-only">
-                Value of one {currency.name} in each other supported currency
+                {t("rates.crossCaption", { name: currency.name })}
               </caption>
               <tbody>
                 {ALL_CURRENCIES.filter((c) => c.code !== currency.code).map((other) => {

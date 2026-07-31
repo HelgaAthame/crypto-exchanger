@@ -10,6 +10,7 @@ import { useRequest } from "@/lib/use-requests";
 import { StepProgress } from "@/components/checkout/step-progress";
 import { OrderSummary } from "@/components/checkout/order-summary";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { useT } from "@/lib/i18n/context";
 import type { ExchangeRequest, ExchangeStep } from "@/types/exchange-request";
 
 const STEP_PATH: Record<ExchangeStep, string> = {
@@ -33,6 +34,7 @@ type Props = {
  * chrome. Requests live in localStorage, so this has to run on the client.
  */
 export function CheckoutShell({ step, title, subtitle, children }: Props) {
+  const t = useT();
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const request = useRequest(params.id);
@@ -52,7 +54,7 @@ export function CheckoutShell({ step, title, subtitle, children }: Props) {
     return (
       <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-16 sm:px-6 lg:px-8 text-sm text-muted">
         <Loader2 className="size-4 animate-spin" aria-hidden />
-        Loading request…
+        {t("status.loading")}
       </div>
     );
   }
@@ -62,16 +64,16 @@ export function CheckoutShell({ step, title, subtitle, children }: Props) {
       <PageContainer className="pt-16">
         <div className="surface-card rounded-3xl p-10 text-center">
           <XCircle className="mx-auto size-8 text-muted" aria-hidden />
-          <p className="mt-4 font-medium">Request not found</p>
+          <p className="mt-4 font-medium">{t("status.notFound")}</p>
           <p className="mt-1.5 text-sm text-muted">
-            It may have been created in a different browser.
+            {t("status.notFoundBody")}
           </p>
           <Link
             href="/"
             className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
           >
             <ArrowLeft className="size-3.5" aria-hidden />
-            Back to calculator
+            {t("status.backToCalculator")}
           </Link>
         </div>
       </PageContainer>
@@ -82,9 +84,9 @@ export function CheckoutShell({ step, title, subtitle, children }: Props) {
     <PageContainer className="pb-20 pt-10">
       <Breadcrumbs
         items={[
-          { label: "Calculator", href: "/" },
-          { label: "History", href: "/history" },
-          { label: "Request", href: `/exchange/${request.id}` },
+          { label: t("nav.calculator"), href: "/" },
+          { label: t("history.title"), href: "/history" },
+          { label: t("status.title"), href: `/exchange/${request.id}` },
           { label: title },
         ]}
       />
@@ -107,8 +109,7 @@ export function CheckoutShell({ step, title, subtitle, children }: Props) {
 
           <p className="mt-6 flex items-start gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
             <ShieldAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-            Demo checkout — no real payment is processed, no payment provider is contacted,
-            and nothing you enter leaves this browser.
+            {t("checkout.demoNotice")}
           </p>
         </div>
 
