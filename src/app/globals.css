@@ -225,6 +225,31 @@ body {
   );
 }
 
+/* The hero photograph: drained of its own colour so the tint above it can
+   carry the brand gold, and dimmed so the headline never fights it. */
+.hero-photo {
+  /* Light theme: the photo is nearly black, so it has to be lifted a long way
+     to read as texture rather than a dark slab under a pale page. */
+  filter: saturate(0.25) brightness(1.9) contrast(0.85);
+  opacity: 0.5;
+}
+
+/* The theme is class-driven, so this cannot be a prefers-color-scheme query. */
+.dark .hero-photo {
+  filter: saturate(0.35) contrast(1.05) brightness(0.55);
+  opacity: 1;
+}
+
+/* Photo bands inside cards get the same treatment as the hero image, so the
+   page reads as one set of pictures rather than assorted stock. */
+.photo-band {
+  filter: saturate(0.4) contrast(1.05) brightness(0.95);
+}
+
+.dark .photo-band {
+  filter: saturate(0.45) contrast(1.05) brightness(0.7);
+}
+
 /* Hero backdrop: slow gold aurora over a fading grid. Only transform and
    opacity animate, and the whole thing stills under reduced motion. */
 .hero-aurora {

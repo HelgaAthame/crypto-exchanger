@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -27,9 +28,9 @@ const HIGHLIGHTS = [
 ];
 
 const STEPS = [
-  { icon: Calculator, key: "home.step1" },
-  { icon: Wallet, key: "home.step2" },
-  { icon: LineChart, key: "home.step3" },
+  { icon: Calculator, key: "home.step1", photo: "/photos/coins-on-chart.jpg" },
+  { icon: Wallet, key: "home.step2", photo: "/photos/coin-closeup.jpg" },
+  { icon: LineChart, key: "home.step3", photo: "/photos/trader-desk.jpg" },
 ];
 
 export default function Home() {
@@ -93,20 +94,36 @@ export default function Home() {
             <p className="mt-2 max-w-prose text-sm text-muted">{t("home.howSubtitle")}</p>
 
             <ol className="mt-8 grid gap-5 md:grid-cols-3">
-              {STEPS.map(({ icon: Icon, key }, i) => (
+              {STEPS.map(({ icon: Icon, key, photo }, i) => (
                 <li key={key}>
                   <Reveal delay={i * 90}>
-                    <div className="surface-card h-full rounded-2xl p-5">
-                      <span className="flex items-center gap-2.5">
-                        <span className="grid size-9 shrink-0 place-items-center rounded-xl border border-accent/25 bg-accent/10 text-accent">
-                          <Icon className="size-4" aria-hidden />
-                        </span>
-                        <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted">
-                          {t("home.step", { n: i + 1 })}
+                    <div className="surface-card group h-full overflow-hidden rounded-2xl">
+                      {/* The photo is a header band, not a backdrop: text keeps
+                          its own surface and its contrast is unaffected. */}
+                      <span className="relative block h-28 overflow-hidden">
+                        <Image
+                          src={photo}
+                          alt=""
+                          fill
+                          sizes="(min-width: 768px) 20rem, 100vw"
+                          className="photo-band object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <span className="absolute inset-0 bg-accent/20 mix-blend-color" />
+                        <span className="absolute inset-0 bg-linear-to-t from-card via-card/40 to-transparent" />
+                        <span className="absolute bottom-3 left-4 flex items-center gap-2.5">
+                          <span className="grid size-9 shrink-0 place-items-center rounded-xl border border-accent/30 bg-card/80 text-accent backdrop-blur-sm">
+                            <Icon className="size-4" aria-hidden />
+                          </span>
+                          <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted">
+                            {t("home.step", { n: i + 1 })}
+                          </span>
                         </span>
                       </span>
-                      <p className="mt-4 font-medium">{t(`${key}.title`)}</p>
-                      <p className="mt-1.5 text-sm text-muted">{t(`${key}.body`)}</p>
+
+                      <span className="block p-5 pt-4">
+                        <p className="font-medium">{t(`${key}.title`)}</p>
+                        <p className="mt-1.5 text-sm text-muted">{t(`${key}.body`)}</p>
+                      </span>
                     </div>
                   </Reveal>
                 </li>
@@ -145,21 +162,37 @@ export default function Home() {
         <Reveal>
           <section
             aria-labelledby="demo-heading"
-            className="surface-card mt-16 rounded-3xl p-6 sm:p-10"
+            className="surface-card relative mt-16 overflow-hidden rounded-3xl p-6 sm:p-10"
           >
-            <span className="grid size-10 place-items-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400">
+            <Image
+              src="/photos/trading-screens.jpg"
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 64rem, 100vw"
+              className="photo-band pointer-events-none object-cover opacity-20"
+            />
+            {/* The copy here is the point, so the picture stays behind a scrim
+                heavy enough that the paragraph never loses contrast. */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-linear-to-r from-card via-card/95 to-card/70"
+            />
+
+            <span className="relative grid size-10 place-items-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400">
               <ShieldAlert className="size-5" aria-hidden />
             </span>
             <h2
               id="demo-heading"
-              className="mt-5 text-2xl font-semibold tracking-tight sm:text-3xl"
+              className="relative mt-5 text-2xl font-semibold tracking-tight sm:text-3xl"
             >
               {t("home.demoTitle")}
             </h2>
-            <p className="mt-3 max-w-prose text-sm text-muted">{t("home.demoBody")}</p>
+            <p className="relative mt-3 max-w-prose text-sm text-muted">
+              {t("home.demoBody")}
+            </p>
             <Link
               href="/history"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline"
+              className="relative mt-6 inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline"
             >
               {t("home.seeRequests")}
               <ArrowRight className="size-3.5" aria-hidden />

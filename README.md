@@ -130,6 +130,12 @@ Interactive elements share one animation language: lift on hover, press down on
 active, gold focus ring for keyboard users, and everything decorative disabled
 under `prefers-reduced-motion`.
 
+Photography in `public/photos/` is desaturated and gold-tinted through the
+`.hero-photo` / `.photo-band` filters rather than shown as shot — crypto stock
+imagery is overwhelmingly blue, which would fight the gold identity on every
+other surface. Photos always sit under a scrim, so no headline or paragraph
+depends on how bright the picture behind it happens to be.
+
 See `PLAN.md` sections 12–13 for the full brand/design specification.
 
 ## Tech stack

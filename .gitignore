@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# iStock preview — not licensed for publication, kept out of the deploy
+/photos-unlicensed
