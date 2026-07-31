@@ -7,6 +7,7 @@ import { NavBar } from "@/components/nav-bar";
 import { RatesTicker } from "@/components/rates-ticker";
 import { AlertsWatcher } from "@/components/alerts-watcher";
 import { SkipLink } from "@/components/skip-link";
+import { SyncBoot } from "@/components/sync-boot";
 import { LocaleProvider } from "@/lib/i18n/context";
 
 const geistSans = Geist({
@@ -50,6 +51,7 @@ export default function RootLayout({
               {children}
             </main>
             <AlertsWatcher />
+            <SyncBoot />
           </LocaleProvider>
         </ThemeProvider>
       </body>

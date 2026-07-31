@@ -6,7 +6,10 @@ import type {
   PaymentMethod,
 } from "@/types/exchange-request";
 
+import { pushRecord } from "@/lib/sync";
+
 const STORAGE_KEY = "crypto-exchanger:requests";
+const API_PATH = "/api/requests";
 
 /**
  * Requests saved before the checkout flow existed have no `step`, which would
@@ -85,6 +88,9 @@ export function createRequest(
   const all = readAll();
   all.push(request);
   writeAll(all);
+  // Local storage stays the source of truth the UI reads; the server is a
+  // copy that outlives a cleared cache.
+  pushRecord(API_PATH, request);
   return request;
 }
 
@@ -94,6 +100,7 @@ function patchRequest(id: string, patch: Partial<ExchangeRequest>): void {
   if (index === -1) return;
   all[index] = { ...all[index], ...patch };
   writeAll(all);
+  pushRecord(API_PATH, all[index]);
 }
 
 export function setPaymentMethod(id: string, paymentMethod: PaymentMethod): void {

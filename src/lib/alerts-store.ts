@@ -1,6 +1,9 @@
 import type { AlertDirection, RateAlert } from "@/lib/alerts";
 
+import { deleteRecord, pushRecord } from "@/lib/sync";
+
 const STORAGE_KEY = "crypto-exchanger:alerts";
+const API_PATH = "/api/alerts";
 
 const listeners = new Set<() => void>();
 
@@ -52,17 +55,21 @@ export function createAlert(input: {
     triggeredAt: null,
   };
   writeAll([...readAll(), alert]);
+  pushRecord(API_PATH, alert);
   return alert;
 }
 
 export function deleteAlert(id: string): void {
   writeAll(readAll().filter((a) => a.id !== id));
+  deleteRecord(API_PATH, id);
 }
 
 export function markTriggered(ids: string[]): void {
   if (ids.length === 0) return;
   const now = new Date().toISOString();
-  writeAll(
-    readAll().map((a) => (ids.includes(a.id) ? { ...a, triggeredAt: now } : a))
-  );
+  const next = readAll().map((a) => (ids.includes(a.id) ? { ...a, triggeredAt: now } : a));
+  writeAll(next);
+  for (const alert of next.filter((a) => ids.includes(a.id))) {
+    pushRecord(API_PATH, alert);
+  }
 }

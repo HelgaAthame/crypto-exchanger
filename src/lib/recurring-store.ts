@@ -1,6 +1,9 @@
 import type { Cadence, RecurringPlan } from "@/lib/recurring";
 
+import { deleteRecord, pushRecord } from "@/lib/sync";
+
 const STORAGE_KEY = "crypto-exchanger:recurring";
+const API_PATH = "/api/recurring";
 
 const listeners = new Set<() => void>();
 
@@ -48,13 +51,18 @@ export function createPlan(input: {
     paused: false,
   };
   writeAll([...readAll(), plan]);
+  pushRecord(API_PATH, plan);
   return plan;
 }
 
 export function deletePlan(id: string): void {
   writeAll(readAll().filter((p) => p.id !== id));
+  deleteRecord(API_PATH, id);
 }
 
 export function togglePlan(id: string): void {
-  writeAll(readAll().map((p) => (p.id === id ? { ...p, paused: !p.paused } : p)));
+  const next = readAll().map((p) => (p.id === id ? { ...p, paused: !p.paused } : p));
+  writeAll(next);
+  const updated = next.find((p) => p.id === id);
+  if (updated) pushRecord(API_PATH, updated);
 }
