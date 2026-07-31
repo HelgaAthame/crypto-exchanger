@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Pause, Play, TrendingDown, TrendingUp } from "lucide-react";
 import { CurrencyIcon } from "@/components/currency-icon";
@@ -15,6 +15,21 @@ type TickerItem = {
 
 const REFRESH_MS = 60_000;
 
+/** Must match --ticker-duration in globals.css. */
+const SCROLL_SECONDS = 45;
+/** Below this the pointer was pressing a link, not dragging the strip. */
+const DRAG_THRESHOLD_PX = 5;
+
+function currentTranslateX(el: HTMLElement): number {
+  const { transform } = getComputedStyle(el);
+  if (!transform || transform === "none") return 0;
+  return new DOMMatrixReadOnly(transform).m41;
+}
+
+function prefersReducedMotion(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 function formatPrice(value: number): string {
   if (value >= 1000) return value.toLocaleString("en-US", { maximumFractionDigits: 0 });
   if (value >= 1) return value.toFixed(2);
@@ -26,6 +41,99 @@ export function RatesTicker() {
   // WCAG 2.2.2: auto-scrolling content that runs longer than five seconds
   // needs a control that does not depend on hover.
   const [paused, setPaused] = useState(false);
+  const [dragging, setDragging] = useState(false);
+
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const drag = useRef({
+    active: false,
+    /** Set once the pointer passes the threshold; suppresses the click. */
+    moved: false,
+    reduced: false,
+    startClientX: 0,
+    startOffset: 0,
+    lastX: 0,
+  });
+
+  function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    // Only the primary button, and never on the pause control.
+    if (event.button !== 0) return;
+    const track = trackRef.current;
+    const viewport = viewportRef.current;
+    if (!track || !viewport) return;
+
+    const reduced = prefersReducedMotion();
+    drag.current = {
+      active: true,
+      moved: false,
+      reduced,
+      startClientX: event.clientX,
+      // With the animation running the position lives in the transform matrix;
+      // under reduced motion the strip is a normal scroll container instead.
+      startOffset: reduced ? viewport.scrollLeft : currentTranslateX(track),
+      lastX: 0,
+    };
+
+    if (!reduced) {
+      // Hand the transform over to JS: the keyframes and the drag cannot both
+      // own it, so the animation stops and resumes from wherever we let go.
+      track.style.animation = "none";
+      track.style.transform = `translateX(${drag.current.startOffset}px)`;
+    }
+
+    viewport.setPointerCapture(event.pointerId);
+    setDragging(true);
+  }
+
+  function onPointerMove(event: React.PointerEvent<HTMLDivElement>) {
+    if (!drag.current.active) return;
+    const track = trackRef.current;
+    const viewport = viewportRef.current;
+    if (!track || !viewport) return;
+
+    const dx = event.clientX - drag.current.startClientX;
+    if (Math.abs(dx) > DRAG_THRESHOLD_PX) drag.current.moved = true;
+
+    if (drag.current.reduced) {
+      viewport.scrollLeft = drag.current.startOffset - dx;
+      return;
+    }
+
+    // The track holds two identical copies, so wrapping at half its width
+    // makes dragging endless in both directions.
+    const half = track.scrollWidth / 2;
+    const raw = drag.current.startOffset + dx;
+    const wrapped = half > 0 ? (((raw % half) + half) % half) - half : raw;
+    drag.current.lastX = wrapped;
+    track.style.transform = `translateX(${wrapped}px)`;
+  }
+
+  function endDrag(event: React.PointerEvent<HTMLDivElement>) {
+    if (!drag.current.active) return;
+    drag.current.active = false;
+    setDragging(false);
+
+    const track = trackRef.current;
+    const viewport = viewportRef.current;
+    viewport?.releasePointerCapture?.(event.pointerId);
+    if (!track || drag.current.reduced) return;
+
+    // Resume the keyframes at the dragged position by rewinding the animation
+    // to the matching point, instead of letting it snap back to where it was.
+    const half = track.scrollWidth / 2;
+    const progress = half > 0 ? Math.min(Math.max(-drag.current.lastX / half, 0), 1) : 0;
+    track.style.transform = "";
+    track.style.animation = "";
+    track.style.animationDelay = `${-progress * SCROLL_SECONDS}s`;
+  }
+
+  function onClickCapture(event: React.MouseEvent) {
+    // A drag that finishes over a pill must not open that currency.
+    if (!drag.current.moved) return;
+    event.preventDefault();
+    event.stopPropagation();
+    drag.current.moved = false;
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -63,8 +171,17 @@ export function RatesTicker() {
         </span>
       </button>
 
-      <div className="ticker flex-1">
-        <div className="ticker-track" data-paused={paused || undefined}>
+      <div
+        ref={viewportRef}
+        className="ticker flex-1"
+        data-dragging={dragging || undefined}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onClickCapture={onClickCapture}
+      >
+        <div ref={trackRef} className="ticker-track" data-paused={paused || undefined}>
         {[0, 1].map((copy) => (
           <ul
             key={copy}

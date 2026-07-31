@@ -120,7 +120,19 @@ body {
 .ticker-track {
   display: flex;
   width: max-content;
-  animation: ticker-scroll 45s linear infinite;
+  animation: ticker-scroll var(--ticker-duration, 45s) linear infinite;
+}
+
+/* Horizontal gestures belong to the strip, vertical ones to the page. */
+.ticker {
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.ticker[data-dragging] {
+  cursor: grabbing;
+  /* Text selection while dragging looks broken and blocks the gesture. */
+  user-select: none;
 }
 
 /* Keyboard focus must pause the marquee, or a pill scrolls out from under the
