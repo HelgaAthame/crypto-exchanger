@@ -1,23 +1,22 @@
 /**
- * The app has exactly two content widths. Screens use this instead of setting
- * their own max-width, so pages line up with the header instead of shifting
- * as the user moves between them.
+ * Every screen — including the header and the landing page — shares one
+ * container width, so nothing shifts as the user moves between pages.
  *
- * - `frame`   — the app frame: header, banner, ticker, the landing hero grid.
- * - `content` — every interior page.
- *
- * Horizontal padding is identical in both, so the left edge of the content
- * always aligns with the logo.
+ * The width is the app's, not a text column's: an earlier pass capped content
+ * at 42rem, which read as a narrow ribbon stranded in the middle of a wide
+ * display. Pages fill this width by laying out in columns rather than by
+ * stretching prose, and paragraphs get `max-w-prose` where they need it.
  */
 export function PageContainer({
-  variant = "content",
   className = "",
   children,
 }: {
-  variant?: "frame" | "content";
   className?: string;
   children: React.ReactNode;
 }) {
-  const width = variant === "frame" ? "max-w-5xl" : "max-w-2xl";
-  return <div className={`mx-auto w-full ${width} px-4 sm:px-5 ${className}`}>{children}</div>;
+  return (
+    <div className={`mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 ${className}`}>
+      {children}
+    </div>
+  );
 }

@@ -58,7 +58,7 @@ export default function ExchangeStatusPage() {
 
   if (request === undefined) {
     return (
-      <div className="mx-auto flex max-w-2xl items-center gap-2 px-4 py-16 sm:px-5 text-sm text-muted">
+      <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-16 sm:px-6 lg:px-8 text-sm text-muted">
         <Loader2 className="size-4 animate-spin" aria-hidden />
         Loading request…
       </div>

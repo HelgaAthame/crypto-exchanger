@@ -8,6 +8,7 @@ import { ArrowLeft, Loader2, ShieldAlert, XCircle } from "lucide-react";
 import { resolveStepAccess } from "@/lib/checkout-flow";
 import { useRequest } from "@/lib/use-requests";
 import { StepProgress } from "@/components/checkout/step-progress";
+import { OrderSummary } from "@/components/checkout/order-summary";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import type { ExchangeRequest, ExchangeStep } from "@/types/exchange-request";
 
@@ -49,7 +50,7 @@ export function CheckoutShell({ step, title, subtitle, children }: Props) {
 
   if (request === undefined || redirectTo) {
     return (
-      <div className="mx-auto flex max-w-2xl items-center gap-2 px-4 py-16 sm:px-5 text-sm text-muted">
+      <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-16 sm:px-6 lg:px-8 text-sm text-muted">
         <Loader2 className="size-4 animate-spin" aria-hidden />
         Loading request…
       </div>
@@ -95,17 +96,23 @@ export function CheckoutShell({ step, title, subtitle, children }: Props) {
         method={request.paymentMethod}
       />
 
-      <div className="surface-card rise-in rounded-3xl p-6 sm:p-8">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-        {subtitle && <p className="mt-1.5 text-sm text-muted">{subtitle}</p>}
+      {/* Two columns from lg: the step on the left, a standing order summary on
+          the right, which is what fills the width instead of blank margin. */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+        <div className="surface-card rise-in rounded-3xl p-6 sm:p-8">
+          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          {subtitle && <p className="mt-1.5 max-w-prose text-sm text-muted">{subtitle}</p>}
 
-        <div className="mt-6">{children(request)}</div>
+          <div className="mt-6">{children(request)}</div>
 
-        <p className="mt-6 flex items-start gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
-          <ShieldAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-          Demo checkout — no real payment is processed, no payment provider is contacted, and
-          nothing you enter leaves this browser.
-        </p>
+          <p className="mt-6 flex items-start gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
+            <ShieldAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+            Demo checkout — no real payment is processed, no payment provider is contacted,
+            and nothing you enter leaves this browser.
+          </p>
+        </div>
+
+        <OrderSummary request={request} />
       </div>
     </PageContainer>
   );

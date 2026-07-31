@@ -50,7 +50,7 @@ export function AlertForm({ giveCurrency, receiveCurrency, currentRate }: Props)
   }
 
   return (
-    <div className="mt-6 border-t border-border/70 pt-5">
+    <div className="mt-3">
       <label className="flex flex-col gap-1.5">
         <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
           Notify me when 1 {giveCurrency} is

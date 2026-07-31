@@ -68,6 +68,8 @@ export default function CurrencyDetailPage() {
         ]}
       />
 
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+        <div className="flex flex-col gap-6">
       <div className="surface-card rise-in rounded-3xl p-6 sm:p-8">
         <div className="flex items-center gap-3">
           <CurrencyIcon code={currency.code} className="size-10 text-base" />
@@ -132,18 +134,29 @@ export default function CurrencyDetailPage() {
           )}
         </div>
 
-        <AlertForm
-          giveCurrency={currency.code}
-          receiveCurrency={quote}
-          currentRate={
-            self && quoteRow ? computeCrossRate(self.usdPrice, quoteRow.usdPrice) : null
-          }
-        />
       </div>
 
-      <RateChart from={currency.code} to={quote} />
+          <RateChart from={currency.code} to={quote} />
+        </div>
 
-      <section aria-labelledby="cross-rates-heading" className="surface-card mt-6 rounded-3xl p-5 sm:p-6">
+        <div className="flex flex-col gap-6">
+          <section
+            aria-labelledby="alert-heading"
+            className="surface-card rounded-3xl p-5 sm:p-6"
+          >
+            <h2 id="alert-heading" className="text-sm font-semibold">
+              Watch this rate
+            </h2>
+            <AlertForm
+              giveCurrency={currency.code}
+              receiveCurrency={quote}
+              currentRate={
+                self && quoteRow ? computeCrossRate(self.usdPrice, quoteRow.usdPrice) : null
+              }
+            />
+          </section>
+
+      <section aria-labelledby="cross-rates-heading" className="surface-card rounded-3xl p-5 sm:p-6">
         <h2 id="cross-rates-heading" className="text-sm font-semibold">
           1 {currency.code} in other currencies
         </h2>
@@ -186,7 +199,9 @@ export default function CurrencyDetailPage() {
             </table>
           </div>
         )}
-      </section>
+          </section>
+        </div>
+      </div>
     </PageContainer>
   );
 }

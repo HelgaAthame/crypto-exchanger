@@ -28,7 +28,7 @@ export default function HistoryPage() {
 
       <div className="mb-7">
         <h1 className="text-3xl font-semibold tracking-tight">Request history</h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 max-w-prose text-sm text-muted">
           Demo requests stored in this browser only — nothing is sent to a server.
         </p>
       </div>
@@ -46,7 +46,7 @@ export default function HistoryPage() {
           </Link>
         </div>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid gap-3 lg:grid-cols-2">
           {requests.map((r) => (
             <li key={r.id}>
               <Link

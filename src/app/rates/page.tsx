@@ -58,7 +58,7 @@ export default function RatesPage() {
 
       <div className="mb-7">
         <h1 className="text-3xl font-semibold tracking-tight">Live rates</h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 max-w-prose text-sm text-muted">
           US dollar price and 24-hour change for every currency this demo supports.
           {updatedAt && ` Updated ${new Date(updatedAt).toLocaleTimeString()}.`}
         </p>

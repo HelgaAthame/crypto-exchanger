@@ -53,7 +53,7 @@ export default function AlertsPage() {
 
       <div className="mb-7">
         <h1 className="text-3xl font-semibold tracking-tight">Rate alerts</h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 max-w-prose text-sm text-muted">
           Checked in this browser roughly once a minute, while a tab is open. Nothing is
           emailed or pushed — this is a demo, so alerts cannot reach you elsewhere.
         </p>
@@ -72,7 +72,7 @@ export default function AlertsPage() {
           </Link>
         </div>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid gap-3 lg:grid-cols-2">
           {alerts.map((alert) => {
             const rate = currentRate(alert.giveCurrency, alert.receiveCurrency);
             const distance = rate ? distanceToTargetPercent(alert, rate) : null;

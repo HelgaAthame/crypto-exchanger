@@ -213,6 +213,49 @@ body {
   );
 }
 
+/* Hero backdrop: slow gold aurora over a fading grid. Only transform and
+   opacity animate, and the whole thing stills under reduced motion. */
+.hero-aurora {
+  background: radial-gradient(
+    circle at 50% 50%,
+    var(--gold-mid) 0%,
+    color-mix(in oklab, var(--gold-dark) 60%, transparent) 40%,
+    transparent 70%
+  );
+  filter: blur(90px);
+  animation: aurora-drift 22s ease-in-out infinite alternate;
+}
+
+.hero-aurora-slow {
+  animation-duration: 31s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes aurora-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(6%, 8%, 0) scale(1.15);
+  }
+}
+
+.hero-grid {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 75%);
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-aurora {
+    animation: none;
+  }
+}
+
 /* A light band sweeps across the button once per hover, like a reflection
    crossing polished metal. One pass, never a loop — a repeating glint turns a
    button into an ad banner. Only transform moves, so it stays on the
