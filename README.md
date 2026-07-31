@@ -53,6 +53,9 @@ demonstration of a converter/exchange UX and domain logic.
   for crypto) → animated status tracker
 - Demo exchange requests, stored in `localStorage` (no backend/database)
 - Request history page
+- English and Russian, with a language switch in the header
+- Light/dark theme, gold-on-black brand styling
+- Demo banner communicating the non-real nature of the project
 
 ## Screens
 
@@ -102,9 +105,6 @@ The flow is designed to look real while making a real transfer impossible:
 - The IBAN shown for bank transfers belongs to no real account.
 - Every checkout step carries its own "no real payment is processed" notice on
   top of the site-wide demo banner.
-- English and Russian, with a language switch in the header
-- Light/dark theme, gold-on-black brand styling
-- Demo banner communicating the non-real nature of the project
 
 ## Brand and design
 
