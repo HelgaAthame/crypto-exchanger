@@ -53,6 +53,8 @@ demonstration of a converter/exchange UX and domain logic.
   for crypto) → animated status tracker
 - Demo exchange requests, stored in `localStorage` (no backend/database)
 - Request history page
+- Recurring buy plans — a standing schedule shown with its next run date and
+  90-day projection, on `/recurring`
 - English and Russian, with a language switch in the header
 - Light/dark theme, gold-on-black brand styling
 - Demo banner communicating the non-real nature of the project
@@ -65,6 +67,7 @@ demonstration of a converter/exchange UX and domain logic.
 | `/rates` | Every supported currency with its USD price and 24h change |
 | `/rates/[code]` | One currency: price, 24h change, history chart, cross-rates, alert form, deep links into the calculator |
 | `/alerts` | Rate alerts, waiting ones first |
+| `/recurring` | Recurring buy plans with next run dates and projected spend |
 | `/history` | Demo exchange requests from this browser |
 | `/exchange/[id]` | Request status, walking the simulated pipeline |
 | `/exchange/[id]/{method,details,confirm,otp,deposit}` | Checkout steps, gated by the request's own `step` field |
@@ -257,6 +260,18 @@ The direction (`above` / `below`) is derived rather than asked for:
 "above 100" when the rate is already 200 — which would fire instantly and mean
 nothing — cannot be created. Triggered alerts keep their place in the list as a
 result rather than disappearing, and never fire twice.
+
+### Recurring buys
+
+A plan says "spend this much on this pair every week". Nothing executes — there
+are no funds to spend — so instead of pretending, a plan reports when it *would*
+next run and what it would add up to over 90 days.
+
+The scheduling is pure and unit-tested. Monthly plans advance by calendar month
+rather than 30 days, and a plan started on the 31st clamps to the 30th (or 28th)
+in shorter months instead of sliding into the following one — the behaviour a
+real recurring purchase has. Daily and weekly plans skip elapsed runs
+arithmetically rather than looping.
 
 ### The chart
 

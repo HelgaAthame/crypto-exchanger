@@ -13,6 +13,7 @@ const LINKS = [
   { href: "/", key: "nav.calculator" },
   { href: "/rates", key: "nav.rates" },
   { href: "/alerts", key: "nav.alerts" },
+  { href: "/recurring", key: "nav.recurring" },
   { href: "/history", key: "nav.history" },
 ];
 
@@ -77,8 +78,9 @@ export function NavBar() {
         </Link>
 
         <div className="flex shrink-0 items-center gap-1">
-          {/* Full nav from sm up; below that it moves into the panel. */}
-          <nav aria-label={t("nav.main")} className="hidden items-center gap-1.5 text-sm sm:flex">
+          {/* Full nav from md up; below that it moves into the panel — five links
+              plus the toggles no longer fit beside the logo at sm. */}
+          <nav aria-label={t("nav.main")} className="hidden items-center gap-1.5 text-sm md:flex">
             {LINKS.map(({ href, key }) => {
               const isCurrent = pathname === href;
               return (
@@ -103,7 +105,7 @@ export function NavBar() {
             aria-expanded={open}
             aria-controls="mobile-nav"
             onClick={() => setOpen((o) => !o)}
-            className="grid size-9 place-items-center rounded-full border border-border/70 text-muted transition-colors hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 sm:hidden"
+            className="grid size-9 place-items-center rounded-full border border-border/70 text-muted transition-colors hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 md:hidden"
           >
             {open ? <X className="size-4" aria-hidden /> : <Menu className="size-4" aria-hidden />}
             <span className="sr-only">{open ? t("nav.closeMenu") : t("nav.openMenu")}</span>
@@ -115,7 +117,7 @@ export function NavBar() {
         ref={panelRef}
         id="mobile-nav"
         hidden={!open}
-        className="border-t border-border/60 bg-shell backdrop-blur-xl sm:hidden"
+        className="border-t border-border/60 bg-shell backdrop-blur-xl md:hidden"
       >
         <nav aria-label={t("nav.main")} className="flex flex-col gap-1 px-4 py-3">
           {LINKS.map(({ href, key }) => {

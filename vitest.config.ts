@@ -21,6 +21,7 @@ export default defineConfig({
         "src/lib/rate-history.ts",
         "src/lib/alerts.ts",
         "src/lib/i18n/translate.ts",
+        "src/lib/recurring.ts",
       ],
       thresholds: {
         lines: 100,
