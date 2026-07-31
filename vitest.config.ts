@@ -19,6 +19,7 @@ export default defineConfig({
         "src/lib/checkout-flow.ts",
         "src/lib/operations.ts",
         "src/lib/rate-history.ts",
+        "src/lib/alerts.ts",
       ],
       thresholds: {
         lines: 100,

@@ -1,0 +1,109 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { BellRing, X } from "lucide-react";
+import { isAlertTriggered, type RateAlert } from "@/lib/alerts";
+import { markTriggered } from "@/lib/alerts-store";
+import { useAlerts } from "@/lib/use-alerts";
+import { computeCrossRate } from "@/lib/exchange-calc";
+
+const POLL_MS = 60_000;
+
+type TickerItem = { code: string; usdPrice: number };
+
+/**
+ * Alerts are checked in the browser, on the same 60s cadence the ticker already
+ * uses. That means they only fire while a tab is open — stated plainly in the
+ * UI rather than dressed up as background delivery, since there is no backend.
+ */
+export function AlertsWatcher() {
+  const alerts = useAlerts();
+  const [fired, setFired] = useState<RateAlert[]>([]);
+
+  const waiting = alerts?.filter((a) => a.triggeredAt === null) ?? [];
+  const waitingKey = waiting.map((a) => a.id).join(",");
+
+  useEffect(() => {
+    if (waitingKey === "") return;
+
+    let cancelled = false;
+    async function check() {
+      try {
+        const res = await fetch("/api/ticker");
+        if (!res.ok) return;
+        const data = (await res.json()) as { items: TickerItem[] };
+        if (cancelled) return;
+
+        const usd = new Map(data.items.map((i) => [i.code, i.usdPrice]));
+        const hits: RateAlert[] = [];
+
+        for (const alert of waiting) {
+          const give = usd.get(alert.giveCurrency);
+          const receive = usd.get(alert.receiveCurrency);
+          if (!give || !receive) continue;
+          if (isAlertTriggered(alert, computeCrossRate(give, receive))) hits.push(alert);
+        }
+
+        if (hits.length > 0) {
+          markTriggered(hits.map((a) => a.id));
+          setFired((current) => [...current, ...hits]);
+        }
+      } catch {
+        // A failed poll just means the next one does the work.
+      }
+    }
+
+    check();
+    const interval = window.setInterval(check, POLL_MS);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+    // `waiting` is derived from this key; depending on the array itself would
+    // restart the poll on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [waitingKey]);
+
+  if (fired.length === 0) return null;
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed bottom-4 left-1/2 z-100 w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2"
+    >
+      <div className="surface-card rise-in flex items-start gap-3 rounded-2xl p-4">
+        <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-xl border border-accent/30 bg-accent/10 text-accent">
+          <BellRing className="size-4" aria-hidden />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium">
+            {fired.length === 1 ? "Rate alert triggered" : `${fired.length} rate alerts triggered`}
+          </p>
+          <p className="mt-0.5 text-xs text-muted">
+            {fired
+              .slice(0, 3)
+              .map((a) => `${a.giveCurrency}/${a.receiveCurrency}`)
+              .join(", ")}
+          </p>
+          <Link
+            href="/alerts"
+            onClick={() => setFired([])}
+            className="mt-2 inline-block text-xs font-medium text-accent hover:underline"
+          >
+            View alerts
+          </Link>
+        </div>
+        <button
+          type="button"
+          onClick={() => setFired([])}
+          className="grid size-7 shrink-0 place-items-center rounded-full text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+        >
+          <X className="size-3.5" aria-hidden />
+          <span className="sr-only">Dismiss</span>
+        </button>
+      </div>
+    </div>
+  );
+}

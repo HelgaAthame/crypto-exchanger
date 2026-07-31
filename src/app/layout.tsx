@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { DemoBanner } from "@/components/demo-banner";
 import { NavBar } from "@/components/nav-bar";
 import { RatesTicker } from "@/components/rates-ticker";
+import { AlertsWatcher } from "@/components/alerts-watcher";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,6 +51,7 @@ export default function RootLayout({
           <main id="main" tabIndex={-1} className="flex-1 scroll-mt-24">
             {children}
           </main>
+          <AlertsWatcher />
         </ThemeProvider>
       </body>
     </html>

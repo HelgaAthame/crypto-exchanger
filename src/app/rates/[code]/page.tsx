@@ -6,6 +6,7 @@ import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { AlertForm } from "@/components/alert-form";
 import { CurrencyIcon } from "@/components/currency-icon";
 import { RateChart } from "@/components/rate-chart";
 import { ALL_CURRENCIES, getCurrency } from "@/lib/currencies";
@@ -55,6 +56,7 @@ export default function CurrencyDetailPage() {
   // USD is the bridge, so it has no USD price of its own to chart against.
   const quote = currency.code === "USD" ? "EUR" : "USD";
   const isCrypto = currency.kind === "crypto";
+  const quoteRow = rows?.find((r) => r.code === quote);
 
   return (
     <PageContainer className="pb-20 pt-10">
@@ -129,6 +131,14 @@ export default function CurrencyDetailPage() {
             </Link>
           )}
         </div>
+
+        <AlertForm
+          giveCurrency={currency.code}
+          receiveCurrency={quote}
+          currentRate={
+            self && quoteRow ? computeCrossRate(self.usdPrice, quoteRow.usdPrice) : null
+          }
+        />
       </div>
 
       <RateChart from={currency.code} to={quote} />

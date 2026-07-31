@@ -43,6 +43,8 @@ demonstration of a converter/exchange UX and domain logic.
 - Rate history chart for the selected pair (7 / 30 / 90 days) with a crosshair
   tooltip and a table view of the same data
 - `/rates` page listing every supported currency with its USD price and 24h change
+- Rate alerts — "notify me when 1 BTC is above X" — checked in the browser and
+  surfaced in-app on `/alerts`
 - Live rates ticker under the header: continuously scrolling pills with per-coin
   icons, USD price and 24h change, fed by the same real rate providers and
   refreshed every 60s
@@ -51,6 +53,18 @@ demonstration of a converter/exchange UX and domain logic.
   for crypto) → animated status tracker
 - Demo exchange requests, stored in `localStorage` (no backend/database)
 - Request history page
+
+## Screens
+
+| Route | What it does |
+|---|---|
+| `/` | Calculator: operation switcher, currency pair, two-way amount entry, fee breakdown, rate history chart |
+| `/rates` | Every supported currency with its USD price and 24h change |
+| `/rates/[code]` | One currency: price, 24h change, history chart, cross-rates, alert form, deep links into the calculator |
+| `/alerts` | Rate alerts, waiting ones first |
+| `/history` | Demo exchange requests from this browser |
+| `/exchange/[id]` | Request status, walking the simulated pipeline |
+| `/exchange/[id]/{method,details,confirm,otp,deposit}` | Checkout steps, gated by the request's own `step` field |
 
 ## Checkout flow
 
@@ -162,6 +176,12 @@ Postgres/Supabase).
 - `src/lib/history-store.ts` — `localStorage`-backed CRUD for exchange requests,
   exposed to components through `src/lib/use-requests.ts` (`useSyncExternalStore`,
   so screens update on change instead of polling).
+- `src/lib/alerts.ts` — pure alert rules (`isAlertTriggered`, `suggestDirection`,
+  `distanceToTargetPercent`, `validateAlert`), unit-tested. Stored and observed
+  by `alerts-store.ts` / `use-alerts.ts`, the same pattern as requests, and
+  evaluated by `src/components/alerts-watcher.tsx`.
+- `src/components/layout/page-container.tsx` — the app's only two content widths,
+  so screens line up with the header instead of each setting their own.
 - `src/components/checkout/` — shared checkout chrome: step guard/shell, progress
   indicator, and the deliberately non-scannable demo QR.
 - `src/components/exchange-calculator.tsx` — the main calculator UI.
@@ -222,6 +242,20 @@ that needed deliberate work:
   payment methods a `radiogroup`, and the active nav item carries `aria-current`.
 - `prefers-reduced-motion` disables the ticker scroll, entrance animations and
   hover lifts.
+
+### Rate alerts
+
+An alert watches a pair for a target rate. There is no backend, so it is checked
+in the browser on the same 60-second cadence the ticker already uses — which
+means it only fires while a tab is open. The UI says exactly that instead of
+implying background delivery, and no Notification API or permission prompt is
+used, since a browser notification would suggest a reach the demo does not have.
+
+The direction (`above` / `below`) is derived rather than asked for:
+`suggestDirection` compares the target with the current rate, so an alert for
+"above 100" when the rate is already 200 — which would fire instantly and mean
+nothing — cannot be created. Triggered alerts keep their place in the list as a
+result rather than disappearing, and never fire twice.
 
 ### The chart
 
