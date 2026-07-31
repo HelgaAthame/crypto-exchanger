@@ -328,7 +328,7 @@ export function ExchangeCalculator() {
           type="button"
           onClick={handleCreateRequest}
           disabled={!result || rateLoading}
-          className="gold-surface mt-5 w-full rounded-xl py-3.5 text-base font-semibold text-black shadow-lg shadow-accent/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 active:translate-y-0 disabled:pointer-events-none disabled:opacity-45"
+          className="gold-surface sheen mt-5 w-full rounded-xl py-3.5 text-base font-semibold text-black shadow-lg shadow-accent/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 active:translate-y-0 disabled:pointer-events-none disabled:opacity-45"
         >
           Continue to payment
         </button>

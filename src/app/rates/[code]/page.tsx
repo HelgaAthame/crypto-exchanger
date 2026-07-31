@@ -117,7 +117,7 @@ export default function CurrencyDetailPage() {
                 ? `/?mode=buy&receive=${currency.code}`
                 : `/?mode=exchange&give=${currency.code}`
             }
-            className="gold-surface inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-black shadow-lg shadow-accent/25 transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 active:translate-y-0"
+            className="gold-surface sheen inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-black shadow-lg shadow-accent/25 transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 active:translate-y-0"
           >
             {isCrypto ? `Buy ${currency.code}` : `Exchange ${currency.code}`}
             <ArrowRight className="size-4" aria-hidden />
@@ -125,7 +125,7 @@ export default function CurrencyDetailPage() {
           {isCrypto && (
             <Link
               href={`/?mode=sell&give=${currency.code}`}
-              className="inline-flex items-center gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-medium transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 active:translate-y-0"
+              className="sheen-border inline-flex items-center gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-medium transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 active:translate-y-0"
             >
               Sell {currency.code}
             </Link>

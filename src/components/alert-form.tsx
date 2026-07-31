@@ -74,7 +74,7 @@ export function AlertForm({ giveCurrency, receiveCurrency, currentRate }: Props)
             type="button"
             onClick={submit}
             disabled={!currentRate || targetNumber <= 0}
-            className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-medium transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 active:translate-y-0 disabled:pointer-events-none disabled:opacity-45"
+            className="sheen-border inline-flex shrink-0 items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-medium transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 active:translate-y-0 disabled:pointer-events-none disabled:opacity-45"
           >
             {created ? (
               <Check className="size-4 text-success" aria-hidden />

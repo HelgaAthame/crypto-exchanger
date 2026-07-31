@@ -212,3 +212,109 @@ body {
     var(--gold-dark) 100%
   );
 }
+
+/* A light band sweeps across the button once per hover, like a reflection
+   crossing polished metal. One pass, never a loop — a repeating glint turns a
+   button into an ad banner. Only transform moves, so it stays on the
+   compositor. */
+.sheen {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 60%
+  );
+  transform: translateX(-100%);
+}
+
+.sheen:hover::after,
+.sheen:focus-visible::after {
+  animation: sheen-sweep 0.7s ease-out;
+}
+
+.sheen:active::after {
+  animation: sheen-sweep 0.35s ease-out;
+}
+
+@keyframes sheen-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Outlined buttons have no fill for a band to cross, so the glint travels
+   around the border instead: a conic gradient rotates behind a mask that
+   exposes only the 1px frame. */
+.sheen-border {
+  position: relative;
+  isolation: isolate;
+}
+
+.sheen-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--sheen-angle, 0deg),
+    transparent 0deg,
+    transparent 300deg,
+    var(--gold-light) 340deg,
+    transparent 360deg
+  );
+  /* Punch out the middle so only the frame is painted. */
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  opacity: 0;
+}
+
+.sheen-border:hover::before,
+.sheen-border:focus-visible::before {
+  opacity: 1;
+  animation: sheen-orbit 0.9s ease-out;
+}
+
+@property --sheen-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes sheen-orbit {
+  from {
+    --sheen-angle: 0deg;
+  }
+  to {
+    --sheen-angle: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheen::after,
+  .sheen-border::before {
+    animation: none !important;
+    opacity: 0;
+  }
+}
