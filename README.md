@@ -147,15 +147,45 @@ See `PLAN.md` sections 12–13 for the full brand/design specification.
 | Styling | Tailwind CSS v4 |
 | Theme | next-themes |
 | Icons | lucide-react |
-| Validation | zod-ready domain layer (see below) |
-| Data storage | `localStorage` only — no database or auth on this MVP |
+| Validation | zod |
+| Data storage | `localStorage`, mirrored to Neon Postgres when `DATABASE_URL` is set |
+| ORM | Drizzle |
 | Rate sources | CoinGecko (crypto→USD), Frankfurter (fiat→USD) |
 | Tests | Vitest, 100% coverage on domain logic |
 | Deploy target | Vercel |
 
-No database, ORM, or authentication in this iteration — deliberately, to keep the
-MVP small. See `PLAN.md` for the possible next iteration (persistent history via
-Postgres/Supabase).
+## Persistence
+
+The database is **optional by design**. With no `DATABASE_URL` the app behaves
+exactly as it always did — everything lives in `localStorage`, every screen
+works, and a fresh clone runs on an empty environment. The API routes answer
+`501` in that case, and the client records that and stops asking.
+
+When a connection string is present, local storage stays the source of truth the
+UI reads and the database is a mirror that outlives a cleared cache. That
+ordering is deliberate: screens render instantly and offline, and a failed write
+can never leave someone watching a spinner over data they already have. On load,
+`hydrateFromServer` pulls the server's rows back and merges them by id with the
+local copy winning — enough to survive a cleared cache, and honest about not
+being real multi-device sync, since anonymous sessions give nothing to merge two
+devices under.
+
+Rows are grouped by an anonymous session id in an httpOnly cookie. It is not
+authentication and is not presented as such: it identifies a browser so its own
+rows can be found again. Deletes match on session as well as id, so one browser
+cannot remove another's row.
+
+### Setting up the database
+
+1. Create a project at [neon.tech](https://neon.tech) and copy the **pooled**
+   connection string.
+2. Put it in `.env.local` as `DATABASE_URL` (see `.env.example`), and add the
+   same variable in Vercel → Settings → Environment Variables.
+3. Run `npm run db:push` to create the tables.
+
+Neon's HTTP driver is used rather than a pooled TCP connection: each serverless
+invocation makes a stateless request, so there is no connection pool for
+Vercel's functions to exhaust.
 
 ## Architecture
 
