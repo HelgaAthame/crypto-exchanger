@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useCallback, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -19,6 +19,7 @@ import { ExchangeCalculator } from "@/components/exchange-calculator";
 import { HeroBackdrop } from "@/components/home/hero-backdrop";
 import { PageContainer } from "@/components/layout/page-container";
 import { Reveal } from "@/components/layout/reveal";
+import { RateChart } from "@/components/rate-chart";
 import { useT } from "@/lib/i18n/context";
 
 const HIGHLIGHTS = [
@@ -35,13 +36,23 @@ const STEPS = [
 
 export default function Home() {
   const t = useT();
+  const [pair, setPairState] = useState({ give: "USD", receive: "BTC" });
+  // Stable identity: the calculator reports the pair from an effect, so a new
+  // function each render would restart that effect on every keystroke.
+  const setPair = useCallback((next: { give: string; receive: string }) => {
+    setPairState((current) =>
+      current.give === next.give && current.receive === next.receive ? current : next
+    );
+  }, []);
 
   return (
     <div className="relative">
       <section className="relative overflow-hidden">
         <HeroBackdrop />
 
-        <PageContainer className="relative grid items-center gap-12 pb-16 pt-14 lg:grid-cols-[1fr_minmax(0,28rem)] lg:gap-16 lg:pb-24 lg:pt-20">
+        {/* Tops aligned, not centres: the calculator is far taller than the
+            copy, so centring pushed the headline down the page. */}
+        <PageContainer className="relative grid items-start gap-12 pb-16 pt-14 lg:grid-cols-[1fr_minmax(0,28rem)] lg:gap-16 lg:pb-20 lg:pt-20">
           <div className="rise-in order-2 lg:order-1">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/25 bg-accent/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-accent">
               <Zap className="size-3" aria-hidden />
@@ -79,9 +90,15 @@ export default function Home() {
           <div className="rise-in order-1 lg:order-2">
             {/* The calculator reads deep-link params, so it needs a Suspense boundary. */}
             <Suspense fallback={<div className="surface-card h-96 rounded-3xl" />}>
-              <ExchangeCalculator />
+              <ExchangeCalculator onPairChange={setPair} />
             </Suspense>
           </div>
+        </PageContainer>
+
+        {/* The chart lives outside the hero grid so it spans the page rather
+            than being squeezed into the calculator's column. */}
+        <PageContainer className="relative pb-16 lg:pb-24">
+          <RateChart from={pair.give} to={pair.receive} />
         </PageContainer>
       </section>
 
@@ -114,7 +131,11 @@ export default function Home() {
                           <span className="grid size-9 shrink-0 place-items-center rounded-xl border border-accent/30 bg-card/80 text-accent backdrop-blur-sm">
                             <Icon className="size-4" aria-hidden />
                           </span>
-                          <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted">
+                          {/* The label needs its own surface: muted text
+                              straight on a photograph has no guaranteed
+                              contrast, since what sits behind any given
+                              letter depends on the picture. */}
+                          <span className="rounded-full border border-border/60 bg-card/85 px-2.5 py-1 text-xs font-medium uppercase tracking-[0.14em] text-foreground backdrop-blur-sm">
                             {t("home.step", { n: i + 1 })}
                           </span>
                         </span>

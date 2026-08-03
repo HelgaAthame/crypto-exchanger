@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Loader2, Table2, TrendingDown, TrendingUp } from "lucide-react";
 import type { RatePoint } from "@/lib/rate-history";
 import { useT } from "@/lib/i18n/context";
@@ -13,10 +13,11 @@ type HistoryResponse = {
   changePercent: number | null;
 };
 
-const WIDTH = 520;
-const PLOT_HEIGHT = 150;
 const AXIS_BAND = 22;
 const PAD_X = 6;
+/** The plot keeps a sane height at any width instead of scaling with it. */
+const MIN_HEIGHT = 140;
+const MAX_HEIGHT = 260;
 
 function formatRate(value: number): string {
   if (value >= 1000) return value.toLocaleString("en-US", { maximumFractionDigits: 0 });
@@ -42,6 +43,25 @@ export function RateChart({ from, to }: { from: string; to: string }) {
   const [failed, setFailed] = useState(false);
   const [showTable, setShowTable] = useState(false);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+
+  // The chart now spans the page, so a fixed viewBox would stretch it into a
+  // very tall band on wide screens. Measuring the container keeps the SVG
+  // coordinate system in step with the pixels it is drawn into.
+  const plotRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(720);
+
+  useEffect(() => {
+    const node = plotRef.current;
+    if (!node || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(([entry]) => {
+      setWidth(Math.max(320, Math.round(entry.contentRect.width)));
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  const WIDTH = width;
+  const PLOT_HEIGHT = Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, Math.round(width * 0.22)));
 
   useEffect(() => {
     let cancelled = false;
@@ -150,7 +170,7 @@ export function RateChart({ from, to }: { from: string; to: string }) {
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4" ref={plotRef}>
         {failed ? (
           <p className="py-10 text-center text-sm text-muted">{t("chart.unavailable")}</p>
         ) : !hasPlot && loading ? (

@@ -24,6 +24,22 @@ function formatPrice(value: number): string {
   return value.toPrecision(4);
 }
 
+function Change({ value }: { value: number | null }) {
+  if (value === null) return <span className="text-muted">—</span>;
+  const up = value >= 0;
+  return (
+    <span className={`inline-flex items-center gap-1 ${up ? "text-success" : "text-danger"}`}>
+      {up ? (
+        <TrendingUp className="size-3.5" aria-hidden />
+      ) : (
+        <TrendingDown className="size-3.5" aria-hidden />
+      )}
+      {up ? "+" : "−"}
+      {Math.abs(value).toFixed(2)}%
+    </span>
+  );
+}
+
 export default function RatesPage() {
   const t = useT();
   const [rows, setRows] = useState<RateRow[] | null>(null);
@@ -74,8 +90,11 @@ export default function RatesPage() {
           {t("rates.loading")}
         </p>
       ) : (
-        <div className="surface-card overflow-x-auto rounded-2xl">
-          <table className="w-full min-w-md text-left text-sm">
+        // No minimum width and no horizontal scroll: below sm the 24h column
+        // folds under the price instead of sliding off-screen, where nothing
+        // hinted it existed.
+        <div className="surface-card rounded-2xl">
+          <table className="w-full text-left text-sm">
             <caption className="sr-only">
               {t("rates.caption")}
             </caption>
@@ -87,16 +106,14 @@ export default function RatesPage() {
                 <th scope="col" className="px-4 py-3 text-right font-medium">
                   {t("rates.price")}
                 </th>
-                <th scope="col" className="px-4 py-3 text-right font-medium">
+                <th scope="col" className="hidden px-4 py-3 text-right font-medium sm:table-cell">
                   {t("rates.change")}
                 </th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => {
-                const up = row.change24h !== null && row.change24h >= 0;
-                return (
-                  <tr key={row.code} className="border-b border-border/50 last:border-0">
+              {rows.map((row) => (
+                <tr key={row.code} className="border-b border-border/50 last:border-0">
                     <th scope="row" className="px-4 py-3 font-normal">
                       <Link
                         href={`/rates/${row.code}`}
@@ -111,29 +128,16 @@ export default function RatesPage() {
                     </th>
                     <td className="px-4 py-3 text-right tabular-nums">
                       ${formatPrice(row.usdPrice)}
+                      {/* Same figure, shown inline where the column is hidden. */}
+                      <span className="mt-0.5 block sm:hidden">
+                        <Change value={row.change24h} />
+                      </span>
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">
-                      {row.change24h === null ? (
-                        <span className="text-muted">—</span>
-                      ) : (
-                        <span
-                          className={`inline-flex items-center gap-1 ${
-                            up ? "text-success" : "text-danger"
-                          }`}
-                        >
-                          {up ? (
-                            <TrendingUp className="size-3.5" aria-hidden />
-                          ) : (
-                            <TrendingDown className="size-3.5" aria-hidden />
-                          )}
-                          {up ? "+" : "−"}
-                          {Math.abs(row.change24h).toFixed(2)}%
-                        </span>
-                      )}
+                    <td className="hidden px-4 py-3 text-right tabular-nums sm:table-cell">
+                      <Change value={row.change24h} />
                     </td>
                   </tr>
-                );
-              })}
+              ))}
             </tbody>
           </table>
         </div>

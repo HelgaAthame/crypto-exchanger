@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowUpDown, Loader2, ShieldCheck, TriangleAlert } from "lucide-react";
 import { CurrencySelect } from "@/components/currency-select";
 import { OperationTabs } from "@/components/operation-tabs";
-import { RateChart } from "@/components/rate-chart";
 import { computeExchangeAmount, validateExchangeRequest } from "@/lib/exchange-calc";
 import { DEFAULT_FEE_PERCENT, MAX_AMOUNT_USD, MIN_AMOUNT_USD } from "@/lib/limits";
 import { createRequest } from "@/lib/history-store";
@@ -34,7 +33,12 @@ function formatAmount(value: number): string {
   return value.toFixed(8).replace(/0+$/, "").replace(/\.$/, "");
 }
 
-export function ExchangeCalculator() {
+type Props = {
+  /** Lets the page render the rate chart at full width, outside this card. */
+  onPairChange?: (pair: { give: string; receive: string }) => void;
+};
+
+export function ExchangeCalculator({ onPairChange }: Props = {}) {
   const t = useT();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -72,6 +76,13 @@ export function ExchangeCalculator() {
   // fetch effect depend on the translator.
   const [rateFailed, setRateFailed] = useState(false);
   const [contact, setContact] = useState("");
+  // Report the pair upward so the page can draw its chart full width. The
+  // calculator keeps ownership of the state — mode changes and the swap button
+  // both rewrite the pair, and splitting that across two components would put
+  // the rules in two places.
+  useEffect(() => {
+    onPairChange?.({ give: giveCurrency, receive: receiveCurrency });
+  }, [giveCurrency, receiveCurrency, onPairChange]);
   // Keep the reason, not the sentence, so the message follows the language.
   const [submitError, setSubmitError] = useState<
     { key: string; params?: Record<string, string | number> } | null
@@ -181,8 +192,7 @@ export function ExchangeCalculator() {
   }
 
   return (
-    <>
-      <div className="surface-card rounded-3xl p-5 sm:p-7">
+    <div className="surface-card rounded-3xl p-5 sm:p-7">
         <div className="mb-5">
           <OperationTabs value={mode} onChange={changeMode} />
         </div>
@@ -349,10 +359,7 @@ export function ExchangeCalculator() {
         <p className="mt-3.5 flex items-center justify-center gap-1.5 text-xs text-muted">
           <ShieldCheck className="size-3.5 text-accent" aria-hidden />
           {t("calc.disclaimer")}
-        </p>
-      </div>
-
-      <RateChart from={giveCurrency} to={receiveCurrency} />
-    </>
+      </p>
+    </div>
   );
 }
