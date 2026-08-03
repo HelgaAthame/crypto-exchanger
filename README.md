@@ -181,7 +181,9 @@ cannot remove another's row.
    connection string.
 2. Put it in `.env.local` as `DATABASE_URL` (see `.env.example`), and add the
    same variable in Vercel → Settings → Environment Variables.
-3. Run `npm run db:push` to create the tables.
+3. Run `npm run db:push` to create the tables. drizzle-kit is a standalone CLI
+   and does not read `.env.local` the way Next.js does, so `drizzle.config.ts`
+   loads it explicitly.
 
 Neon's HTTP driver is used rather than a pooled TCP connection: each serverless
 invocation makes a stateless request, so there is no connection pool for
