@@ -51,7 +51,8 @@ demonstration of a converter/exchange UX and domain logic.
 - Multi-step simulated checkout: payment method → details → confirmation →
   method-specific authorisation (3-D Secure style OTP for cards, deposit screen
   for crypto) → animated status tracker
-- Demo exchange requests, stored in `localStorage` (no backend/database)
+- Demo exchange requests, kept in `localStorage` and mirrored to Postgres when a
+  database is configured
 - Request history page
 - Recurring buy plans — a standing schedule shown with its next run date and
   90-day projection, on `/recurring`
