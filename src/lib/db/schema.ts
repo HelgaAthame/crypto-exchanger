@@ -65,6 +65,27 @@ export const rateAlerts = pgTable(
   (table) => [index("rate_alerts_session_idx").on(table.sessionId, table.createdAt)]
 );
 
+export const limitOrders = pgTable(
+  "limit_orders",
+  {
+    id: text("id").primaryKey(),
+    sessionId,
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+
+    giveCurrency: text("give_currency").notNull(),
+    receiveCurrency: text("receive_currency").notNull(),
+    giveAmount: doublePrecision("give_amount").notNull(),
+    targetRate: doublePrecision("target_rate").notNull(),
+    direction: text("direction").notNull(),
+    rateAtCreation: doublePrecision("rate_at_creation").notNull(),
+    status: text("status").notNull(),
+    filledAt: timestamp("filled_at", { withTimezone: true }),
+    /** The rate it actually filled at, which is rarely the target. */
+    filledRate: doublePrecision("filled_rate"),
+  },
+  (table) => [index("limit_orders_session_idx").on(table.sessionId, table.createdAt)]
+);
+
 export const recurringPlans = pgTable(
   "recurring_plans",
   {

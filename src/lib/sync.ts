@@ -78,6 +78,11 @@ const STORES: StoreSpec[] = [
   { path: "/api/requests", key: "requests", storageKey: "crypto-exchanger:requests" },
   { path: "/api/alerts", key: "alerts", storageKey: "crypto-exchanger:alerts" },
   { path: "/api/recurring", key: "plans", storageKey: "crypto-exchanger:recurring" },
+  {
+    path: "/api/limit-orders",
+    key: "orders",
+    storageKey: "crypto-exchanger:limit-orders",
+  },
 ];
 
 function readLocal<T>(storageKey: string): T[] {

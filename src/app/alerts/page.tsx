@@ -9,6 +9,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { distanceToTargetPercent } from "@/lib/alerts";
 import { deleteAlert } from "@/lib/alerts-store";
 import { useAlerts } from "@/lib/use-alerts";
+import { LimitOrdersPanel } from "@/components/limit-orders-panel";
 import { useT } from "@/lib/i18n/context";
 import { computeCrossRate } from "@/lib/exchange-calc";
 
@@ -160,6 +161,7 @@ export default function AlertsPage() {
           })}
         </ul>
       )}
+      <LimitOrdersPanel currentRate={currentRate} />
     </PageContainer>
   );
 }

@@ -45,6 +45,8 @@ demonstration of a converter/exchange UX and domain logic.
 - `/rates` page listing every supported currency with its USD price and 24h change
 - Rate alerts — "notify me when 1 BTC is above X" — checked in the browser and
   surfaced in-app on `/alerts`
+- Limit orders that wait for a price and fill at the market rate when it is
+  crossed, recorded as a demo trade
 - Live rates ticker under the header: continuously scrolling pills with per-coin
   icons, USD price and 24h change, fed by the same real rate providers and
   refreshed every 60s
@@ -67,7 +69,7 @@ demonstration of a converter/exchange UX and domain logic.
 | `/` | Calculator: operation switcher, currency pair, two-way amount entry, fee breakdown, rate history chart |
 | `/rates` | Every supported currency with its USD price and 24h change |
 | `/rates/[code]` | One currency: price, 24h change, history chart, cross-rates, alert form, deep links into the calculator |
-| `/alerts` | Rate alerts, waiting ones first |
+| `/alerts` | Rate alerts and limit orders, unfinished ones first |
 | `/recurring` | Recurring buy plans with next run dates and projected spend |
 | `/history` | Demo exchange requests from this browser |
 | `/exchange/[id]` | Request status, walking the simulated pipeline |
@@ -311,6 +313,15 @@ rather than 30 days, and a plan started on the 31st clamps to the 30th (or 28th)
 in shorter months instead of sliding into the following one — the behaviour a
 real recurring purchase has. Daily and weekly plans skip elapsed runs
 arithmetically rather than looping.
+
+### Limit orders
+
+An order waits for a price, and fills **at the market rate when the trigger is
+crossed — not at the target**. That distinction is the point: a real market can
+gap straight past a limit, so the fill rate is stored separately and the payout
+is computed from it. Everything else mirrors alerts, including being checked in
+this browser only, and the two share a single poll rather than each running
+their own timer against the same endpoint.
 
 ### The chart
 

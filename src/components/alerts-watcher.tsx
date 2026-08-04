@@ -5,7 +5,10 @@ import Link from "next/link";
 import { BellRing, X } from "lucide-react";
 import { isAlertTriggered, type RateAlert } from "@/lib/alerts";
 import { markTriggered } from "@/lib/alerts-store";
+import { isOrderFillable } from "@/lib/limit-orders";
+import { fillOrders } from "@/lib/limit-orders-store";
 import { useAlerts } from "@/lib/use-alerts";
+import { useLimitOrders } from "@/lib/use-limit-orders";
 import { useT } from "@/lib/i18n/context";
 import { computeCrossRate } from "@/lib/exchange-calc";
 
@@ -21,10 +24,15 @@ type TickerItem = { code: string; usdPrice: number };
 export function AlertsWatcher() {
   const t = useT();
   const alerts = useAlerts();
+  const orders = useLimitOrders();
   const [fired, setFired] = useState<RateAlert[]>([]);
+  const [filled, setFilled] = useState(0);
 
   const waiting = alerts?.filter((a) => a.triggeredAt === null) ?? [];
-  const waitingKey = waiting.map((a) => a.id).join(",");
+  const open = orders?.filter((o) => o.status === "open") ?? [];
+  // One key for both, so a single poll covers alerts and orders rather than
+  // two timers asking the same endpoint for the same prices.
+  const waitingKey = [...waiting.map((a) => a.id), ...open.map((o) => "o:" + o.id)].join(",");
 
   useEffect(() => {
     if (waitingKey === "") return;
@@ -51,6 +59,22 @@ export function AlertsWatcher() {
           markTriggered(hits.map((a) => a.id));
           setFired((current) => [...current, ...hits]);
         }
+
+        // Limit orders fill at the rate the market is at when the trigger is
+        // crossed, not at the target — the price can gap straight past it.
+        const fills: { id: string; rate: number }[] = [];
+        for (const order of open) {
+          const give = usd.get(order.giveCurrency);
+          const receive = usd.get(order.receiveCurrency);
+          if (!give || !receive) continue;
+          const rate = computeCrossRate(give, receive);
+          if (isOrderFillable(order, rate)) fills.push({ id: order.id, rate });
+        }
+
+        if (fills.length > 0) {
+          fillOrders(fills);
+          setFilled((count) => count + fills.length);
+        }
       } catch {
         // A failed poll just means the next one does the work.
       }
@@ -67,7 +91,7 @@ export function AlertsWatcher() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [waitingKey]);
 
-  if (fired.length === 0) return null;
+  if (fired.length === 0 && filled === 0) return null;
 
   return (
     <div
@@ -81,19 +105,26 @@ export function AlertsWatcher() {
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium">
-            {fired.length === 1
-              ? t("alerts.firedOne")
-              : t("alerts.firedMany", { count: fired.length })}
+            {fired.length === 0
+              ? t("orders.filledMany", { count: filled })
+              : fired.length === 1
+                ? t("alerts.firedOne")
+                : t("alerts.firedMany", { count: fired.length })}
           </p>
           <p className="mt-0.5 text-xs text-muted">
-            {fired
-              .slice(0, 3)
-              .map((a) => `${a.giveCurrency}/${a.receiveCurrency}`)
-              .join(", ")}
+            {fired.length > 0
+              ? fired
+                  .slice(0, 3)
+                  .map((a) => `${a.giveCurrency}/${a.receiveCurrency}`)
+                  .join(", ")
+              : t("orders.filledHint")}
           </p>
           <Link
             href="/alerts"
-            onClick={() => setFired([])}
+            onClick={() => {
+              setFired([]);
+              setFilled(0);
+            }}
             className="mt-2 inline-block text-xs font-medium text-accent hover:underline"
           >
             {t("alerts.view")}
@@ -101,7 +132,10 @@ export function AlertsWatcher() {
         </div>
         <button
           type="button"
-          onClick={() => setFired([])}
+          onClick={() => {
+            setFired([]);
+            setFilled(0);
+          }}
           className="grid size-7 shrink-0 place-items-center rounded-full text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
         >
           <X className="size-3.5" aria-hidden />

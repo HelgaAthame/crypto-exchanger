@@ -22,6 +22,7 @@ export default defineConfig({
         "src/lib/alerts.ts",
         "src/lib/i18n/translate.ts",
         "src/lib/recurring.ts",
+        "src/lib/limit-orders.ts",
       ],
       thresholds: {
         lines: 100,
