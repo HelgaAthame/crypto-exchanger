@@ -55,7 +55,7 @@ demonstration of a converter/exchange UX and domain logic.
   for crypto) → animated status tracker
 - Demo exchange requests, kept in `localStorage` and mirrored to Postgres when a
   database is configured
-- Request history page
+- Request history page, tied to an account once you sign in
 - Recurring buy plans — a standing schedule shown with its next run date and
   90-day projection, on `/recurring`
 - English and Russian, with a language switch in the header
@@ -69,9 +69,10 @@ demonstration of a converter/exchange UX and domain logic.
 | `/` | Calculator: operation switcher, currency pair, two-way amount entry, fee breakdown, rate history chart |
 | `/rates` | Every supported currency with its USD price and 24h change |
 | `/rates/[code]` | One currency: price, 24h change, history chart, cross-rates, alert form, deep links into the calculator |
-| `/alerts` | Rate alerts and limit orders, unfinished ones first |
-| `/recurring` | Recurring buy plans with next run dates and projected spend |
-| `/history` | Demo exchange requests from this browser |
+| `/login` | Sign in or create an account |
+| `/alerts` | Rate alerts and limit orders, unfinished ones first (sign-in required) |
+| `/recurring` | Recurring buy plans with next run dates and projected spend (sign-in required) |
+| `/history` | Your demo exchange requests (sign-in required) |
 | `/exchange/[id]` | Request status, walking the simulated pipeline |
 | `/exchange/[id]/{method,details,confirm,otp,deposit}` | Checkout steps, gated by the request's own `step` field |
 
@@ -313,6 +314,40 @@ rather than 30 days, and a plan started on the 31st clamps to the 30th (or 28th)
 in shorter months instead of sliding into the following one — the behaviour a
 real recurring purchase has. Daily and weekly plans skip elapsed runs
 arithmetically rather than looping.
+
+## Accounts
+
+Accounts are optional and deliberately narrow. **The calculator, `/rates`, the
+currency pages and the whole checkout stay open** — pricing any pair instantly is
+the point of the project, and putting a login in front of it would contradict the
+promise on its own home page. Signing in is required only for the three pages
+that list what belongs to one person: `/history`, `/alerts` and `/recurring`.
+
+Anything created before signing in is adopted by the account on the way in, so
+trying the demo first and registering afterwards loses nothing. Only unclaimed
+rows are taken, so signing in on a shared browser cannot absorb records that
+belong to somebody else.
+
+### How it is built
+
+No auth library: a `users` table, an `auth_sessions` table, and cookies.
+
+- Passwords are hashed with **scrypt** from node's own crypto, salted per
+  password, and compared with `timingSafeEqual` — a plain `===` leaks how much of
+  a hash matched through timing. The algorithm is stored alongside the value
+  (`scrypt$salt$hash`) so a future change can migrate rather than guess.
+- Only the **SHA-256 of the session token** is stored, so a database leak hands
+  over no usable session.
+- Signing in with an unknown address still runs a verification against a dummy
+  hash, so a missing account and a wrong password take the same time and the
+  response cannot be used to enumerate who has registered.
+- Route protection is in two layers. `middleware.ts` checks only whether a session
+  cookie exists and issues a real 307 — necessary because a layout that throws
+  `redirect()` after streaming has begun can only deliver the redirect inside a
+  200 response. The cookie is not trusted: `requireUser` in each layout validates
+  the session against the database, so a forged or expired token gets no further.
+- With no `DATABASE_URL` there are no accounts, so the guard stands down entirely
+  rather than locking people out behind a login that cannot work.
 
 ### Limit orders
 
