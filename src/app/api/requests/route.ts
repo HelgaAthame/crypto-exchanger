@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { desc, eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import { z } from "zod";
 import { getDb, isDatabaseConfigured } from "@/lib/db/client";
 import { exchangeRequests } from "@/lib/db/schema";
-import { getSessionId } from "@/lib/db/session";
+import { ownerFilter, resolveOwner } from "@/lib/db/owner";
 import type { ExchangeRequest } from "@/types/exchange-request";
 
 /** 501 rather than 500: the app is expected to run without a database. */
@@ -34,11 +34,11 @@ const requestSchema = z.object({
 export async function GET() {
   if (!isDatabaseConfigured()) return NOT_CONFIGURED;
 
-  const sessionId = await getSessionId();
+  const owner = await resolveOwner();
   const rows = await getDb()
     .select()
     .from(exchangeRequests)
-    .where(eq(exchangeRequests.sessionId, sessionId))
+    .where(ownerFilter(owner, exchangeRequests))
     .orderBy(desc(exchangeRequests.createdAt));
 
   return NextResponse.json({ requests: rows.map(toClient) });
@@ -52,11 +52,12 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request payload" }, { status: 400 });
   }
 
-  const sessionId = await getSessionId();
+  const owner = await resolveOwner();
   const input = parsed.data;
   const values = {
     id: input.id,
-    sessionId,
+    sessionId: owner.sessionId,
+    userId: owner.userId,
     createdAt: new Date(input.createdAt),
     updatedAt: new Date(),
     status: input.status,

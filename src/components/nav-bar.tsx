@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
+import { AccountMenu } from "@/components/account-menu";
 import { useT } from "@/lib/i18n/context";
 
 const LINKS = [
@@ -96,6 +97,7 @@ export function NavBar() {
             })}
           </nav>
 
+          <AccountMenu />
           <LanguageToggle />
           <ThemeToggle />
 

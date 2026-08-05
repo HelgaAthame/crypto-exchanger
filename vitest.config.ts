@@ -23,6 +23,8 @@ export default defineConfig({
         "src/lib/i18n/translate.ts",
         "src/lib/recurring.ts",
         "src/lib/limit-orders.ts",
+        "src/lib/auth/credentials.ts",
+        "src/lib/auth/password.ts",
       ],
       thresholds: {
         lines: 100,

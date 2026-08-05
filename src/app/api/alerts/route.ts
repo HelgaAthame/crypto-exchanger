@@ -3,7 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { getDb, isDatabaseConfigured } from "@/lib/db/client";
 import { rateAlerts } from "@/lib/db/schema";
-import { getSessionId } from "@/lib/db/session";
+import { ownerFilter, resolveOwner } from "@/lib/db/owner";
 import type { RateAlert } from "@/lib/alerts";
 
 const NOT_CONFIGURED = NextResponse.json(
@@ -25,11 +25,11 @@ const alertSchema = z.object({
 export async function GET() {
   if (!isDatabaseConfigured()) return NOT_CONFIGURED;
 
-  const sessionId = await getSessionId();
+  const owner = await resolveOwner();
   const rows = await getDb()
     .select()
     .from(rateAlerts)
-    .where(eq(rateAlerts.sessionId, sessionId))
+    .where(ownerFilter(owner, rateAlerts))
     .orderBy(desc(rateAlerts.createdAt));
 
   return NextResponse.json({
@@ -56,11 +56,12 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Invalid alert payload" }, { status: 400 });
   }
 
-  const sessionId = await getSessionId();
+  const owner = await resolveOwner();
   const input = parsed.data;
   const values = {
     id: input.id,
-    sessionId,
+    sessionId: owner.sessionId,
+    userId: owner.userId,
     createdAt: new Date(input.createdAt),
     giveCurrency: input.giveCurrency,
     receiveCurrency: input.receiveCurrency,
@@ -84,11 +85,11 @@ export async function DELETE(request: NextRequest) {
   const id = new URL(request.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
 
-  const sessionId = await getSessionId();
-  // Scoped by session as well as id, so one browser cannot delete another's row.
+  const owner = await resolveOwner();
+  // Scoped by ownership as well as id, so nobody can delete another's row.
   await getDb()
     .delete(rateAlerts)
-    .where(and(eq(rateAlerts.id, id), eq(rateAlerts.sessionId, sessionId)));
+    .where(and(eq(rateAlerts.id, id), ownerFilter(owner, rateAlerts)));
 
   return NextResponse.json({ ok: true });
 }

@@ -17,11 +17,41 @@ import type { PaymentDetails } from "@/types/exchange-request";
  */
 const sessionId = text("session_id").notNull();
 
+/**
+ * Set once a row is claimed by an account. Rows created before signing in keep
+ * only their session id, and logging in adopts them — so trying the demo first
+ * and registering later does not lose anything.
+ */
+const userId = text("user_id");
+
+export const users = pgTable("users", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  /** scrypt output plus its salt — never the password itself. */
+  passwordHash: text("password_hash").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const authSessions = pgTable(
+  "auth_sessions",
+  {
+    /** SHA-256 of the cookie token: a database leak hands over no live session. */
+    tokenHash: text("token_hash").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [index("auth_sessions_user_idx").on(table.userId)]
+);
+
 export const exchangeRequests = pgTable(
   "exchange_requests",
   {
     id: text("id").primaryKey(),
     sessionId,
+    userId,
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 
@@ -53,6 +83,7 @@ export const rateAlerts = pgTable(
   {
     id: text("id").primaryKey(),
     sessionId,
+    userId,
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 
     giveCurrency: text("give_currency").notNull(),
@@ -70,6 +101,7 @@ export const limitOrders = pgTable(
   {
     id: text("id").primaryKey(),
     sessionId,
+    userId,
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 
     giveCurrency: text("give_currency").notNull(),
@@ -91,6 +123,7 @@ export const recurringPlans = pgTable(
   {
     id: text("id").primaryKey(),
     sessionId,
+    userId,
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 
     giveCurrency: text("give_currency").notNull(),

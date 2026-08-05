@@ -3,7 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { getDb, isDatabaseConfigured } from "@/lib/db/client";
 import { recurringPlans } from "@/lib/db/schema";
-import { getSessionId } from "@/lib/db/session";
+import { ownerFilter, resolveOwner } from "@/lib/db/owner";
 import type { RecurringPlan } from "@/lib/recurring";
 
 const NOT_CONFIGURED = NextResponse.json(
@@ -25,11 +25,11 @@ const planSchema = z.object({
 export async function GET() {
   if (!isDatabaseConfigured()) return NOT_CONFIGURED;
 
-  const sessionId = await getSessionId();
+  const owner = await resolveOwner();
   const rows = await getDb()
     .select()
     .from(recurringPlans)
-    .where(eq(recurringPlans.sessionId, sessionId))
+    .where(ownerFilter(owner, recurringPlans))
     .orderBy(desc(recurringPlans.createdAt));
 
   return NextResponse.json({
@@ -56,11 +56,12 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Invalid plan payload" }, { status: 400 });
   }
 
-  const sessionId = await getSessionId();
+  const owner = await resolveOwner();
   const input = parsed.data;
   const values = {
     id: input.id,
-    sessionId,
+    sessionId: owner.sessionId,
+    userId: owner.userId,
     createdAt: new Date(input.createdAt),
     giveCurrency: input.giveCurrency,
     receiveCurrency: input.receiveCurrency,
@@ -84,10 +85,10 @@ export async function DELETE(request: NextRequest) {
   const id = new URL(request.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
 
-  const sessionId = await getSessionId();
+  const owner = await resolveOwner();
   await getDb()
     .delete(recurringPlans)
-    .where(and(eq(recurringPlans.id, id), eq(recurringPlans.sessionId, sessionId)));
+    .where(and(eq(recurringPlans.id, id), ownerFilter(owner, recurringPlans)));
 
   return NextResponse.json({ ok: true });
 }
