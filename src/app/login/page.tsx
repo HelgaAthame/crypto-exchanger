@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { LogIn, ShieldAlert, UserPlus } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
+import { OAuthButtons } from "@/components/oauth-buttons";
 import { useT } from "@/lib/i18n/context";
 
 type Mode = "sign-in" | "sign-up";
@@ -14,11 +15,13 @@ function LoginForm() {
   const searchParams = useSearchParams();
   // Where the visitor was heading when they were asked to sign in.
   const next = searchParams.get("next") ?? "/history";
+  // The OAuth callback cannot render a message, so it reports failures via the URL.
+  const callbackError = searchParams.get("error");
 
   const [mode, setMode] = useState<Mode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorKey, setErrorKey] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState<string | null>(callbackError);
   const [loading, setLoading] = useState(false);
 
   async function submit(event: React.FormEvent) {
@@ -132,6 +135,8 @@ function LoginForm() {
               {t(isSignUp ? "auth.signUp" : "auth.signIn")}
             </button>
           </form>
+
+          <OAuthButtons />
 
           <p className="mt-5 text-center text-sm text-muted">
             {t(isSignUp ? "auth.haveAccount" : "auth.noAccount")}{" "}
