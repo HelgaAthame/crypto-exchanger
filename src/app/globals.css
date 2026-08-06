@@ -370,10 +370,23 @@ body {
   opacity: 0;
 }
 
+/*
+ * Keeps orbiting for as long as the pointer stays. A single ease-out pass
+ * finished in under a second and parked the arc in one spot, which read as a
+ * static smudge rather than a moving highlight. `linear` so the speed does not
+ * visibly stutter each time the loop restarts.
+ */
 .sheen-border:hover::before,
 .sheen-border:focus-visible::before {
   opacity: 1;
-  animation: sheen-orbit 0.9s ease-out;
+  animation: sheen-orbit 1.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheen-border:hover::before,
+  .sheen-border:focus-visible::before {
+    animation: none;
+  }
 }
 
 @property --sheen-angle {
