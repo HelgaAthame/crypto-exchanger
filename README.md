@@ -349,6 +349,23 @@ No auth library: a `users` table, an `auth_sessions` table, and cookies.
 - With no `DATABASE_URL` there are no accounts, so the guard stands down entirely
   rather than locking people out behind a login that cannot work.
 
+### When something breaks
+
+A client-side crash used to die in the visitor's console: `error.tsx` showed a
+message and nobody was any the wiser. `/api/errors` receives those reports and
+logs them as one line of JSON each, in the same shape `instrumentation.ts` uses
+for server errors, so a single filter over the deployment logs finds both.
+
+Reports are redacted before they are logged — tokens, anything
+password-shaped and email addresses are stripped by pattern. No password ever
+reaches a URL in this app, but a reporting pipeline is exactly where that kind
+of assumption quietly stops holding. Fields are truncated, and a crash loop is
+rate-limited so it cannot fill the log.
+
+This is not a monitoring service: it makes failures visible in Vercel's logs
+rather than invisible. Pointing it at Sentry or similar is a change to
+`formatLogLine` alone.
+
 ### Link previews and crawlers
 
 `opengraph-image.tsx` draws the share card with `next/og` rather than shipping a

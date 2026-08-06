@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import { reportClientError } from "@/lib/monitoring/client";
+
 /**
  * Catches errors thrown in the root layout itself, where the normal error
  * boundary has no shell to render into — so this file ships its own <html>.
@@ -11,6 +14,10 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    reportClientError(error);
+  }, [error]);
+
   return (
     <html lang="en">
       <body

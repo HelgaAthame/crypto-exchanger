@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { PageContainer } from "@/components/layout/page-container";
 import { ArrowLeft, RotateCcw, TriangleAlert } from "lucide-react";
 import { useT } from "@/lib/i18n/context";
+import { reportClientError } from "@/lib/monitoring/client";
 
 export default function Error({
   error,
@@ -13,6 +15,11 @@ export default function Error({
   reset: () => void;
 }) {
   const t = useT();
+
+  // Without this the detail dies in the visitor browser console.
+  useEffect(() => {
+    reportClientError(error);
+  }, [error]);
 
   return (
     <PageContainer className="pb-20 pt-16 text-center">

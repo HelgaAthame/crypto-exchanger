@@ -19,6 +19,25 @@ const AUTH_COOKIE = "ce_auth";
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  /**
+   * Currency pages are prerendered under upper-case codes, and
+   * `dynamicParams: false` means anything else is a 404 — so `/rates/btc`
+   * would fail on Linux while quietly working on a case-insensitive local
+   * filesystem. Redirecting instead of accepting both also keeps one canonical
+   * URL per currency.
+   */
+  const currency = /^\/rates\/([^/]+)$/.exec(pathname);
+  if (currency) {
+    const code = decodeURIComponent(currency[1]);
+    if (code !== code.toUpperCase()) {
+      const canonical = request.nextUrl.clone();
+      canonical.pathname = `/rates/${encodeURIComponent(code.toUpperCase())}`;
+      return NextResponse.redirect(canonical, 308);
+    }
+    return NextResponse.next();
+  }
+
   if (!PROTECTED.some((path) => pathname === path || pathname.startsWith(`${path}/`))) {
     return NextResponse.next();
   }
@@ -31,5 +50,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/history/:path*", "/alerts/:path*", "/recurring/:path*"],
+  matcher: ["/history/:path*", "/alerts/:path*", "/recurring/:path*", "/rates/:code"],
 };

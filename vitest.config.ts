@@ -25,6 +25,7 @@ export default defineConfig({
         "src/lib/limit-orders.ts",
         "src/lib/auth/credentials.ts",
         "src/lib/auth/password.ts",
+        "src/lib/monitoring/report.ts",
       ],
       thresholds: {
         lines: 100,
