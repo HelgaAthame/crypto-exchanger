@@ -9,6 +9,7 @@ import { AlertsWatcher } from "@/components/alerts-watcher";
 import { SkipLink } from "@/components/skip-link";
 import { SyncBoot } from "@/components/sync-boot";
 import { LocaleProvider } from "@/lib/i18n/context";
+import { siteUrl } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,12 +22,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  // Makes the generated OG image and any relative metadata URL absolute,
+  // which is what link previews need.
+  metadataBase: new URL(siteUrl()),
   title: {
     default: "Crypto Exchanger — demo exchange calculator",
     template: "%s · Crypto Exchanger",
   },
   description:
     "A portfolio demo project: live fiat/crypto exchange rate calculator. No real funds are transferred.",
+  openGraph: {
+    type: "website",
+    siteName: "Crypto Exchanger",
+    url: siteUrl(),
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({

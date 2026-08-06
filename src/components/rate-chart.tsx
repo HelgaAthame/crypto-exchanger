@@ -205,6 +205,26 @@ export function RateChart({ from, to }: { from: string; to: string }) {
                 </linearGradient>
               </defs>
 
+              {/* The two figures that give the plot a scale. Without them the
+                  only way to read a value is to hover, which leaves the shape
+                  meaningless on a touch screen or in a screenshot. */}
+              <text
+                x={0}
+                y={y(max) - 5}
+                className="fill-muted"
+                style={{ fontSize: 10 }}
+              >
+                {formatRate(max)}
+              </text>
+              <text
+                x={0}
+                y={y(min) + 12}
+                className="fill-muted"
+                style={{ fontSize: 10 }}
+              >
+                {formatRate(min)}
+              </text>
+
               {/* Hairline solid gridlines, one step off the surface. */}
               {[0, 0.5, 1].map((fraction) => (
                 <line

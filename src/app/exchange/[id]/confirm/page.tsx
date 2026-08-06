@@ -9,7 +9,9 @@ import { setStep, startProcessing } from "@/lib/history-store";
 import { useT } from "@/lib/i18n/context";
 import type { ExchangeRequest, PaymentMethod } from "@/types/exchange-request";
 
-const RATE_LOCK_SECONDS = 120;
+/** Five minutes, not two: the old window expired while people were still
+ *  reading the page, turning a reassurance into an obstacle. */
+const RATE_LOCK_SECONDS = 300;
 
 const METHOD_KEY: Record<PaymentMethod, string> = {
   card: "method.card",

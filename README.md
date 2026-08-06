@@ -349,6 +349,23 @@ No auth library: a `users` table, an `auth_sessions` table, and cookies.
 - With no `DATABASE_URL` there are no accounts, so the guard stands down entirely
   rather than locking people out behind a login that cannot work.
 
+### Link previews and crawlers
+
+`opengraph-image.tsx` draws the share card with `next/og` rather than shipping a
+static PNG, so it cannot drift out of step with the brand it is drawn from.
+Satori supports a subset of CSS, so the palette is written out in full there
+instead of reaching for the CSS variables the site uses.
+
+`sitemap.xml` lists only the public pages. `/history`, `/alerts` and `/recurring`
+sit behind a login and hold one person's records, so listing them would send
+crawlers to a redirect and say nothing about the site; `robots.txt` disallows
+them along with `/api` and the checkout.
+
+Both build their absolute URLs from `lib/site.ts`, which prefers
+`NEXT_PUBLIC_SITE_URL` and otherwise falls back to the Vercel deployment host —
+that is what keeps preview deployments from advertising themselves as the real
+domain.
+
 ### Limit orders
 
 An order waits for a price, and fills **at the market rate when the trigger is
@@ -434,11 +451,11 @@ Deployed on Vercel (free tier).
 Frankfurter) are public and keyless, so the app builds and runs with an empty
 environment.
 
-One variable is optional: `NEXT_PUBLIC_SITE_URL` (e.g.
+One variable is worth setting: `NEXT_PUBLIC_SITE_URL` (e.g.
 `https://crypto-exchanger.vercel.app`). It is used only to build absolute URLs
-inside the breadcrumb JSON-LD; without it those URLs fall back to a placeholder
-host, which affects search-engine rich results but nothing a visitor sees. Set it
-once the production domain is known.
+for the breadcrumb JSON-LD, the sitemap and the link-preview card. Without it
+those fall back to the Vercel deployment host, which works but pins previews to
+whichever deployment served them. Set it once the production domain is known.
 
 ### Rate limits in production
 
