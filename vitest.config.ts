@@ -26,6 +26,7 @@ export default defineConfig({
         "src/lib/auth/credentials.ts",
         "src/lib/auth/password.ts",
         "src/lib/monitoring/report.ts",
+        "src/lib/scheduler.ts",
       ],
       thresholds: {
         lines: 100,

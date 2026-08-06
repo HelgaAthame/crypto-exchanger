@@ -132,6 +132,8 @@ export const recurringPlans = pgTable(
     cadence: text("cadence").notNull(),
     startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
     paused: boolean("paused").notNull().default(false),
+    /** Set by the scheduler; the guard against executing a plan twice. */
+    lastRunAt: timestamp("last_run_at", { withTimezone: true }),
   },
   (table) => [index("recurring_plans_session_idx").on(table.sessionId, table.createdAt)]
 );
