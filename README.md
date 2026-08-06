@@ -349,6 +349,37 @@ No auth library: a `users` table, an `auth_sessions` table, and cookies.
 - With no `DATABASE_URL` there are no accounts, so the guard stands down entirely
   rather than locking people out behind a login that cannot work.
 
+### Three ways in
+
+Email and password is the baseline. Two more sit next to it, and both are
+optional in the same way the database is — the buttons appear only where the
+deployment is actually configured for them, because a button that leads to a 501
+is worse than no button.
+
+**OAuth (GitHub, Google).** Each provider is a pair of env vars; whichever pair
+exists gets a button. The start route issues an httpOnly `state` cookie and the
+callback refuses a response whose state does not match, which is what stops a
+login-CSRF — an attacker sending you a crafted callback URL that quietly signs
+you into *their* account. Google's profile is accepted only when
+`email_verified` is not false; GitHub's primary address often is not public, so
+the callback falls back to `/user/emails`. A first sign-in creates the account
+with a random unguessable password hash: the row needs one, and nobody should be
+able to use it.
+
+**Passkeys (WebAuthn).** Registered from the account panel on `/history`, used
+from the login page. Signing in does not ask who you are first — with no
+`allowCredentials` the browser offers whichever passkey it holds for this site
+and the credential itself identifies the account, so the form reveals nothing
+about which accounts exist. Challenges live in a `webauthn_challenges` table,
+not a cookie or memory: serverless instances do not share memory, so the request
+that issues a challenge is rarely the one that verifies it. Each row is read and
+deleted in the same call — one use only. The signature counter is stored and
+must strictly increase; a repeated or lower value means a replay or a cloned
+credential and the sign-in is refused. `rpID` is the bare hostname and
+`origin` the full origin, both from `NEXT_PUBLIC_SITE_URL`, which is why a
+preview deployment cannot reuse production's keys — that origin binding is
+exactly what makes a passkey unphishable.
+
 ### When something breaks
 
 A client-side crash used to die in the visitor's console: `error.tsx` showed a

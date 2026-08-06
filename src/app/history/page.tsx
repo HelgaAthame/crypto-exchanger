@@ -5,6 +5,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { ArrowRight, Clock, History as HistoryIcon } from "lucide-react";
 import { useAllRequests } from "@/lib/use-requests";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { PasskeyManager } from "@/components/passkey-manager";
 import { useT } from "@/lib/i18n/context";
 import type { ExchangeRequest } from "@/types/exchange-request";
 
@@ -34,6 +35,8 @@ export default function HistoryPage() {
           {t("history.subtitle")}
         </p>
       </div>
+
+      <PasskeyManager />
 
       {requests.length === 0 ? (
         <div className="rounded-3xl border border-border bg-card p-10 text-center">

@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { LogIn, ShieldAlert, UserPlus } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { OAuthButtons } from "@/components/oauth-buttons";
+import { PasskeySignIn } from "@/components/passkey-signin";
 import { useT } from "@/lib/i18n/context";
 
 type Mode = "sign-in" | "sign-up";
@@ -135,6 +136,10 @@ function LoginForm() {
               {t(isSignUp ? "auth.signUp" : "auth.signIn")}
             </button>
           </form>
+
+          <div className="mt-5">
+            <PasskeySignIn onError={setErrorKey} />
+          </div>
 
           <OAuthButtons />
 

@@ -46,6 +46,43 @@ export const authSessions = pgTable(
   (table) => [index("auth_sessions_user_idx").on(table.userId)]
 );
 
+/**
+ * A registered passkey. The private half never leaves the authenticator, so
+ * what is stored here cannot be replayed as a credential — it only verifies
+ * signatures the device produces.
+ */
+export const passkeys = pgTable(
+  "passkeys",
+  {
+    /** Base64url credential id, as the authenticator reports it. */
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    publicKey: text("public_key").notNull(),
+    /** Replay guard: an authenticator increments this on every use. */
+    counter: doublePrecision("counter").notNull().default(0),
+    transports: text("transports"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    /** What the browser called the device, so a list of keys is readable. */
+    label: text("label"),
+  },
+  (table) => [index("passkeys_user_idx").on(table.userId)]
+);
+
+/**
+ * A challenge in flight. WebAuthn requires the server to issue a one-time
+ * value and check the signature covers it, which is what stops a captured
+ * response being replayed later.
+ */
+export const webauthnChallenges = pgTable("webauthn_challenges", {
+  /** The anonymous session or user the challenge was issued to. */
+  key: text("key").primaryKey(),
+  challenge: text("challenge").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});
+
 export const exchangeRequests = pgTable(
   "exchange_requests",
   {
