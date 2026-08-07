@@ -361,13 +361,18 @@ body {
   padding: 1px;
   background-image: linear-gradient(
     100deg,
-    transparent 38%,
+    transparent 35%,
     var(--gold-light) 50%,
-    transparent 62%
+    transparent 65%
   );
-  background-size: 250% 100%;
+  /* The image is twice the frame, so 100% → 0% slides it exactly one frame
+     width: the glint enters at one edge and leaves at the other with no dead
+     time. Percentage positions are offsets between the two sizes, not of the
+     box, which is how the old 250%/-150%→250% range ended up travelling six
+     widths per cycle and leaving the glint off-screen most of the way. */
+  background-size: 200% 100%;
   background-repeat: no-repeat;
-  background-position: -150% 0;
+  background-position: 100% 0;
   /* Punch out the middle so only the 1px frame is painted: two identical mask
      layers, one clipped to the content box, excluded from each other.
 
@@ -392,7 +397,7 @@ body {
 .sheen-border:hover::before,
 .sheen-border:focus-visible::before {
   opacity: 1;
-  animation: sheen-travel 1.5s linear infinite;
+  animation: sheen-travel 1.2s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -404,10 +409,10 @@ body {
 
 @keyframes sheen-travel {
   from {
-    background-position: -150% 0;
+    background-position: 100% 0;
   }
   to {
-    background-position: 250% 0;
+    background-position: 0% 0;
   }
 }
 
