@@ -50,7 +50,11 @@ export function OAuthButtons() {
           <a
             key={provider}
             href={`/api/auth/oauth/${provider}/start`}
-            className="sheen-border inline-flex items-center justify-center gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-medium transition-all hover:-translate-y-0.5 hover:border-accent/60 hover:bg-accent/10 hover:text-accent hover:shadow-md hover:shadow-accent/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 active:translate-y-0"
+            className="sheen-border inline-flex items-center justify-center 
+            gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-medium 
+            transition-all hover:-translate-y-0.5 hover:border-accent/60 hover:bg-accent/10 
+            hover:text-accent hover:shadow-md hover:shadow-accent/15 focus-visible:outline-none 
+            focus-visible:ring-2 focus-visible:ring-accent/30 active:translate-y-0"
           >
             {provider === "github" ? <GitHubMark /> : <GoogleMark />}
             {t("auth.continueWith", { provider: LABEL[provider] })}

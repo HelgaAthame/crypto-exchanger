@@ -337,8 +337,16 @@ body {
 }
 
 /* Outlined buttons have no fill for a band to cross, so the glint travels
-   around the border instead: a conic gradient rotates behind a mask that
-   exposes only the 1px frame. */
+   along the border instead: a gradient slides behind a mask that exposes only
+   the 1px frame.
+
+   It slides rather than orbits, and that is not a style choice. Rotating a
+   conic gradient needs an animated `@property` angle, and Chromium refuses to
+   animate a registered custom property anywhere inside a link — a side effect
+   of how it keeps `:visited` styling unreadable. The angle ticked over
+   correctly while the gradient ignored it, so every `<a class="sheen-border">`
+   showed a frozen smudge while the buttons animated. `background-position`
+   animates in a link subtree, so this version works on both. */
 .sheen-border {
   position: relative;
   isolation: isolate;
@@ -351,35 +359,40 @@ body {
   z-index: -1;
   border-radius: inherit;
   padding: 1px;
-  background: conic-gradient(
-    from var(--sheen-angle, 0deg),
-    transparent 0deg,
-    transparent 300deg,
-    var(--gold-light) 340deg,
-    transparent 360deg
+  background-image: linear-gradient(
+    100deg,
+    transparent 38%,
+    var(--gold-light) 50%,
+    transparent 62%
   );
-  /* Punch out the middle so only the frame is painted. */
+  background-size: 250% 100%;
+  background-repeat: no-repeat;
+  background-position: -150% 0;
+  /* Punch out the middle so only the 1px frame is painted: two identical mask
+     layers, one clipped to the content box, excluded from each other.
+
+     No `-webkit-` twin. The prefixed shorthand used to follow this one and
+     reset the composite back to `add`, and `-webkit-mask-composite` does not
+     even take the same keywords — so the mask never subtracted anything and
+     the glint washed over the whole button. Standard `mask` has been in
+     Chromium and Safari for years; the duplicate only broke it. */
   mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
   mask-composite: exclude;
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
   opacity: 0;
 }
 
 /*
- * Keeps orbiting for as long as the pointer stays. A single ease-out pass
- * finished in under a second and parked the arc in one spot, which read as a
- * static smudge rather than a moving highlight. `linear` so the speed does not
+ * Keeps travelling for as long as the pointer stays. A single ease-out pass
+ * finished in under a second and parked the highlight in one spot, which read
+ * as a static smudge rather than movement. `linear` so the speed does not
  * visibly stutter each time the loop restarts.
  */
 .sheen-border:hover::before,
 .sheen-border:focus-visible::before {
   opacity: 1;
-  animation: sheen-orbit 1.6s linear infinite;
+  animation: sheen-travel 1.5s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -389,18 +402,12 @@ body {
   }
 }
 
-@property --sheen-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes sheen-orbit {
+@keyframes sheen-travel {
   from {
-    --sheen-angle: 0deg;
+    background-position: -150% 0;
   }
   to {
-    --sheen-angle: 360deg;
+    background-position: 250% 0;
   }
 }
 

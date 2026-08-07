@@ -69,7 +69,12 @@ export function PasskeySignIn({ onError }: { onError: (key: string) => void }) {
       type="button"
       onClick={signIn}
       disabled={busy}
-      className="sheen-border inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-medium transition-all hover:-translate-y-0.5 hover:border-accent/60 hover:bg-accent/10 hover:text-accent hover:shadow-md hover:shadow-accent/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 active:translate-y-0 disabled:pointer-events-none disabled:opacity-45"
+      className="sheen-border inline-flex w-full items-center justify-center 
+      gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-medium 
+      transition-all hover:-translate-y-0.5 hover:border-accent/60 hover:bg-accent/10 
+      hover:text-accent hover:shadow-md hover:shadow-accent/15 focus-visible:outline-none 
+      focus-visible:ring-2 focus-visible:ring-accent/30 active:translate-y-0 
+      disabled:pointer-events-none disabled:opacity-45"
     >
       <Fingerprint className="size-4" aria-hidden />
       {t("auth.passkeySignIn")}
